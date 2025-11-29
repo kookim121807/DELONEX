@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="DELONEX logo">
+  <!-- dark circular background (matches index.html circle) -->
+  <circle cx="32" cy="32" r="30" fill="#0a1224"/>
+
+  <!-- teal arc (scaled from the original 24px logo paths) -->
+  <path
+    d="M13.333 32
+       c8 0 11.2-13.333 18.667-13.333
+       s10.667 13.333 18.667 13.333"
+    fill="none"
+    stroke="#54e1b3"
+    stroke-width="3.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+
+  <!-- cyan arc (mirrored, slightly thinner like original) -->
+  <path
+    d="M13.333 32
+       c8 0 11.2 13.333 18.667 13.333
+       s10.667-13.333 18.667-13.333"
+    fill="none"
+    stroke="#38bdf8"
+    stroke-width="3.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.95"/>
+
+  <!-- central white pupil (scaled) -->
+  <circle cx="32" cy="32" r="5.9" fill="#f8fafc"/>
+</svg>
