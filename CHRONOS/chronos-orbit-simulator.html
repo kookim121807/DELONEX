@@ -1156,6 +1156,14 @@
       color: #94a3b8;
       opacity: 1;
     }
+
+    .site-footer{
+      text-align: center;
+      padding: 12px 0;
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -1774,7 +1782,7 @@ body:not(.light-theme).help-open .top-menu{
     function worldToScreenX(x){ return view.centerX + x * view.scale; }
     function worldToScreenY(y){ return view.centerY + y * view.scale; }
 
-    /* SIMULATION STATE */
+    /* SIMULATION STATUS */
 
     var GM = 15000;
     var x = 0, y = 0, vx = 0, vy = 0;
@@ -1789,6 +1797,16 @@ body:not(.light-theme).help-open .top-menu{
     var trailEnabled = true;
     var trail = [];
     var maxTrail = 1500;
+
+    var starBaseRadius = 18;
+    var planetRadius = 5.5;
+    var crashModeActive = false;
+    var starCrashed = false;
+    var starCrashAnimating = false;
+    var starCrashT = 0;
+    var starCrashDuration = 1.4;
+    var starDestroyed = false;
+    var lastRAF = 0;
 
     /* DOM REFERENCES */
 
@@ -1908,12 +1926,16 @@ body:not(.light-theme).help-open .top-menu{
 
       if(name === "circular"){
         phaseDeg = 0; angleDeg = 90; factor = 1.0;
+        crashModeActive = false;
       }else if(name === "elliptic"){
         phaseDeg = 0; angleDeg = 90; factor = 0.7;
+        crashModeActive = false;
       }else if(name === "escape"){
         phaseDeg = 0; angleDeg = 90; factor = 1.4;
+        crashModeActive = false;
       }else if(name === "crash"){
         phaseDeg = 45; angleDeg = 0; factor = 0.4;
+        crashModeActive = true;
       }
 
       inputPhase.value = phaseDeg;
@@ -1960,6 +1982,10 @@ body:not(.light-theme).help-open .top-menu{
 
       time = 0;
       stepCount = 0;
+      starCrashed = false;
+      starCrashAnimating = false;
+      starCrashT = 0;
+      starDestroyed = false;
 
       resetTrail();
       addTrailPoint();
@@ -1995,6 +2021,19 @@ body:not(.light-theme).help-open .top-menu{
         stepCount++;
         if(trailEnabled && stepCount % 2 === 0){
           addTrailPoint();
+        }
+      }
+      // collision detection //
+      var rNow = Math.sqrt(x*x + y*y);
+      if(crashModeActive && !starCrashed && rNow <= (starBaseRadius + planetRadius)){
+        starCrashAnimating = true;
+        starCrashT = 0;
+        starCrashed = true;
+        running = false;
+        if(btnPlayPause){
+          btnPlayPause.textContent = "▶ Play";
+          btnPlayPause.classList.remove("btn-primary");
+          btnPlayPause.classList.add("btn-ghost");
         }
       }
       updateStatus();
@@ -2053,7 +2092,62 @@ body:not(.light-theme).help-open .top-menu{
     function drawStar(){
       var sx = view.centerX;
       var sy = view.centerY;
-      var starR = 18;
+      var starR = starBaseRadius;
+
+      if(starCrashAnimating){
+        var p = Math.min(1, starCrashT / starCrashDuration);
+        var expand = 1 + Math.pow(p,0.6) * 4.5;
+        starR = starBaseRadius * expand;
+        var alpha = lerp(0.95, 0.05, p);
+        var grad = ctx.createRadialGradient(sx, sy, 2, sx, sy, starR + 8);
+        grad.addColorStop(0, "rgba(255,110,25," + (1 - p*0.1) + ")");
+        grad.addColorStop(0.35, "rgba(255,180,60," + (0.9 - p*0.3) + ")");
+        grad.addColorStop(0.7, "rgba(200,80,30," + (0.6 - p*0.4) + ")");
+        grad.addColorStop(1.0, "rgba(120,30,20," + (0.06 * (1 - p)) + ")");
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = grad;
+        ctx.arc(sx, sy, Math.max(1, starR + 8), 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,160,40," + (alpha) + ")";
+        ctx.arc(sx, sy, Math.max(1, starR), 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+
+        var rays = Math.floor(8 + p*22);
+        ctx.save();
+        ctx.globalAlpha = 0.7 * (1 - p);
+        ctx.strokeStyle = "rgba(255,200,80," + (0.8 - p*0.6) + ")";
+        ctx.lineWidth = 1.4;
+        for(var i=0;i<rays;i++){
+          var a = (i / rays) * Math.PI * 2 + (p * 6);
+          var lx = sx + Math.cos(a) * (starR * 0.9 + p*20);
+          var ly = sy + Math.sin(a) * (starR * 0.9 + p*20);
+          ctx.beginPath();
+          ctx.moveTo(sx + Math.cos(a) * (starR * 0.3), sy + Math.sin(a) * (starR * 0.3));
+          ctx.lineTo(lx, ly);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        return;
+      }
+
+      if(starDestroyed){
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = "linear-gradient(180deg, rgba(30,30,30,1), rgba(10,10,10,1))";
+        ctx.fillStyle = "#3b3b3b";
+        ctx.arc(sx, sy, Math.max(6, starBaseRadius * 0.8), 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+        return;
+      }
 
       var grad = ctx.createRadialGradient(
         sx - 4, sy - 4, 2,
@@ -2387,10 +2481,24 @@ body:not(.light-theme).help-open .top-menu{
       }
     })();
 
-    function frame(){
+    function frame(now){
+      if(!lastRAF) lastRAF = now || performance.now();
+      var delta = Math.max(0, ((now || performance.now()) - lastRAF) / 1000);
+      lastRAF = now || performance.now();
+
       if(running){
         stepSimulationFrame();
       }
+
+      if(starCrashAnimating){
+        starCrashT += delta;
+        if(starCrashT >= starCrashDuration){
+          starCrashAnimating = false;
+          starDestroyed = true;
+        }
+        updateStatus();
+      }
+
       requestAnimationFrame(frame);
     }
 
@@ -2406,7 +2514,6 @@ body:not(.light-theme).help-open .top-menu{
     var btnResetEl = byId("btnReset");
     if(btnResetEl){
       btnResetEl.addEventListener("click", function(){
-        // reset zoom and center //
         var width = canvas.clientWidth;
         var height = canvas.clientHeight;
         view.scale = 1.0;
@@ -2427,16 +2534,16 @@ body:not(.light-theme).help-open .top-menu{
         var fps = 30;
         var stream = canvas.captureStream(fps);
         recordedChunks = [];
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
         mediaRecorder.ondataavailable = function(e){
           if(e.data && e.data.size) recordedChunks.push(e.data);
         };
         mediaRecorder.onstop = function(){
-          var blob = new Blob(recordedChunks, { type: 'video/webm' });
+          var blob = new Blob(recordedChunks, { type: 'video/mp4' });
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a');
           a.href = url;
-          a.download = 'chronos-sim.webm';
+          a.download = 'chronos-sim.mp4';
           document.body.appendChild(a);
           a.click();
           a.remove();
@@ -2678,6 +2785,9 @@ body:not(.light-theme).help-open .top-menu{
 
   })();
 </script>
+
+<footer class="site-footer"> © 2025 DELONEX & Koo Kim (DELTA STEINER) | All rights reserved.
+</footer>
 
 </body>
 </html>
