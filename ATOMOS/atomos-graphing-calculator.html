@@ -871,6 +871,33 @@ tr:nth-child(even){background:rgba(255,255,255,.02)}
     overflow:auto;
     padding-right:4px;
   }
+  #tableControls{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  #tableControls .control button,
+  #tableControls .control select,
+  #tableControls .control input{
+    height:40px;
+  }
+  .window-controls{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .window-field button{
+    height:44px;
+  }
+  #help .box h3{
+    font-size:1.1rem;
+  }
+  #help #closeHelp.btn{
+    min-width:34px;
+    width:34px;
+    height:34px;
+    padding:0;
+    border-radius:10px;
+    font-size:1rem;
+  }
 }
 
 .card{border:1px solid var(--edge);border-radius:14px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));display:flex;flex-direction:column;gap:8px}
@@ -1159,6 +1186,8 @@ tr:nth-child(even){background:rgba(255,255,255,.02)}
 /* help tab */
 #help{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(6,10,20,.7);z-index:50}
 #help .box{max-width:980px;width:min(92vw,980px);max-height:82vh;overflow:auto;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));border:1px solid var(--edge);border-radius:16px;padding:18px}
+#help .box h3{margin:0}
+#help .help-top{display:flex;align-items:center;gap:10px;justify-content:flex-start}
 body.theme-light #help{
   background:rgba(243,244,255,.95);
 }
@@ -1884,7 +1913,7 @@ body.theme-light .kb-tabs{
 <!-- Help Tab -->
 <div id="help">
   <div class="box">
-    <div class="row" style="justify-content:space-between;align-items:center">
+    <div class="row help-top">
       <h3>Help • ATOMOS Graphing Calculator</h3>
       <button id="closeHelp" class="btn" aria-label="Close help">X</button>
     </div>
