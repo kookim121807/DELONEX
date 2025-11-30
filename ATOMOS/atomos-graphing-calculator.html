@@ -253,6 +253,10 @@ body.theme-light header{
   color:var(--ink);
   min-height:42px;
 }
+#themeToggle{
+  font-size:1.35rem;
+  line-height:1;
+}
 .header-actions .btn.acc{
   background:linear-gradient(135deg,#36e0ce,#21c3b4);
   border:0;
@@ -518,7 +522,7 @@ body.theme-light .header-actions-list{
 }
 .card[data-operator="two-var"] .expr-label{
   display:inline-block;
-  margin-bottom:8px; /* extra breathing room above textareas */
+  margin-bottom:8px; 
 }
 .expr-color-swatch{
   display:flex;
@@ -909,14 +913,6 @@ tr:nth-child(even){background:rgba(255,255,255,.02)}
   #help .box h3{
     font-size:1.1rem;
   }
-  #help #closeHelp.btn{
-    min-width:34px;
-    width:34px;
-    height:34px;
-    padding:0;
-    border-radius:10px;
-    font-size:1rem;
-  }
 }
 
 .card{border:1px solid var(--edge);border-radius:14px;padding:12px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));display:flex;flex-direction:column;gap:8px}
@@ -1215,9 +1211,20 @@ tr:nth-child(even){background:rgba(255,255,255,.02)}
 
 /* help tab */
 #help{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(6,10,20,.7);z-index:50}
-#help .box{max-width:980px;width:min(92vw,980px);max-height:82vh;overflow:auto;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));border:1px solid var(--edge);border-radius:16px;padding:18px}
+#help .box{position:relative;max-width:980px;width:min(92vw,980px);max-height:82vh;overflow:auto;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));border:1px solid var(--edge);border-radius:16px;padding:18px}
 #help .box h3{margin:0}
-#help .help-top{display:flex;align-items:center;gap:10px;justify-content:flex-start}
+#help .help-top{position:relative;display:flex;align-items:flex-start;gap:10px;justify-content:flex-start}
+#help .help-top #closeHelp{margin-left:auto;position:absolute;top:-6px;right:0}
+#help #closeHelp.btn{
+  min-width:36px;
+  width:36px;
+  height:36px;
+  padding:0;
+  border-radius:10px;
+  font-size:1rem;
+  line-height:1;
+}
+#help .help-grid{margin-top:14px;row-gap:18px}
 body.theme-light #help{
   background:rgba(243,244,255,.95);
 }
@@ -1974,7 +1981,7 @@ body.theme-light .kb-tabs{
       <h3>Help • ATOMOS Graphing Calculator</h3>
       <button id="closeHelp" class="btn" aria-label="Close help">X</button>
     </div>
-    <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+    <div class="grid help-grid" style="grid-template-columns:1fr 1fr;gap:12px">
       <div class="card">
         <h4>Typing Tips</h4>
         <ul>
@@ -2008,6 +2015,12 @@ let dpr = Math.max(1, window.devicePixelRatio||1);
 const precisions = {low:400, medium:800, high:1400, ultra:2200};
 const TAU = Math.PI * 2;
 let quality='high', view={xmin:-10,xmax:10,ymin:-10,ymax:10,grid:'normal',showGrid:true};
+const FEATURE_COLORS={
+  xIntercept:'#ff6b6b',
+  yIntercept:'#38bdf8',
+  extrema:'#fbbf24',
+  intersection:'#c084fc'
+};
 const THEME_KEY='atomos-theme';
 const headerMenuToggle=byId('headerMenuToggle');
 const headerActions=byId('headerActions');
@@ -2192,6 +2205,7 @@ const fmtPlain=v=>{
   const digits = Math.abs(v)>=1e4 ? 2 : 6;
   return Number(v).toFixed(digits).replace(/\.?0+$/,'');
 };
+const snapSmall=(v,tol=1e-10)=>Math.abs(v)<tol?0:v;
 const fmt=v=>{
   if(!Number.isFinite(v)) return 'DNE';
   const snapped = snapInt(v,1e-6);
@@ -2201,6 +2215,12 @@ const fmt=v=>{
   if(abs>=1e4) return Number(snapped).toFixed(2).replace(/\.?0+$/,'');
   if(abs>=1) return Number(snapped).toFixed(6).replace(/\.?0+$/,'');
   return Number(snapped).toFixed(8).replace(/0+$/,'').replace(/\.$/,'');
+};
+const fmtExact=v=>{
+  if(!Number.isFinite(v)) return 'DNE';
+  const snappedInt=snapInt(v,1e-9);
+  const snappedZero=snapSmall(snappedInt,1e-12);
+  return Number(snappedZero).toFixed(12).replace(/0+$/,'').replace(/\.$/,'');
 };
 const shorten=s=>s.length>48?s.slice(0,48)+'…':s;
 
@@ -2974,6 +2994,7 @@ let isPanning=false, startPan={x:0,y:0}, startView=null;
 let hoverPoint = null;         
 let lastHoverKey = '';          
 let selectedPoint = null;       
+let featurePoints = [];        
 
 canvas.addEventListener('mousedown',e=>{isPanning=true;startPan={x:e.clientX,y:e.clientY};startView={...view}});
 window.addEventListener('mouseup',()=>isPanning=false);
@@ -2983,7 +3004,7 @@ window.addEventListener('mousemove',e=>{
 
   const vars = sliderValues();
   let best=null, bestDist=Infinity;
-  const HIT_PX = 10;
+  const HIT_PX = 14;
   for(const ex of exprs){
     if(!ex.on || ex.mode!=='cart') continue;
     const txt = (ex.text||'').trim();
@@ -3002,6 +3023,16 @@ window.addEventListener('mousemove',e=>{
       continue;
     }
   }
+  for(const pt of featurePoints){
+    if(!Number.isFinite(pt.x)||!Number.isFinite(pt.y)) continue;
+    const px=sx(pt.x), py=sy(pt.y);
+    const d=Math.hypot(px-cx, py-cy);
+    const dAdj = d - 3; 
+    if(dAdj<bestDist){
+      bestDist=dAdj;
+      best={...pt};
+    }
+  }
 
   const hoverKey = (best && bestDist <= HIT_PX) ? `${best.exprId}_${best.x.toFixed(6)}_${best.y.toFixed(6)}` : '';
   if(hoverKey !== lastHoverKey){
@@ -3012,7 +3043,7 @@ window.addEventListener('mousemove',e=>{
   }
 
   if(hoverPoint){
-    byId('readout').textContent = `(${fmt(hoverPoint.x)}, ${fmt(hoverPoint.y)})`;
+    byId('readout').textContent = `(${fmtExact(hoverPoint.x)}, ${fmtExact(hoverPoint.y)})`;
   } else {
     byId('readout').textContent = `x: ${e.shiftKey?X.toFixed(4):X.toFixed(2)} y: ${e.shiftKey?Y.toFixed(4):Y.toFixed(2)}`;
   }
@@ -3029,14 +3060,15 @@ window.addEventListener('mousemove',e=>{
 canvas.addEventListener('click', e => {
   const r = canvas.getBoundingClientRect(), cx = e.clientX - r.left, cy = e.clientY - r.top;
   const clickX = wx(cx), clickY = wy(cy);
-  const HIT_PX = 10;
-  const allPoints = [];
+  const HIT_PX = 14;
+  const allPoints = featurePoints.map(p=>({...p}));
   if (hoverPoint) allPoints.push({...hoverPoint, kind: hoverPoint.kind || 'curve'});
   let best = null, bestDist = Infinity;
   allPoints.forEach(p=>{
     const px = sx(p.x), py = sy(p.y);
     const d = Math.hypot(px - cx, py - cy);
-    if (d < bestDist){ bestDist = d; best = p; }
+    const dAdj = (p.kind && p.kind !== 'curve') ? d - 3 : d;
+    if (dAdj < bestDist){ bestDist = dAdj; best = p; }
   });
   if (best && bestDist <= HIT_PX){
     if(selectedPoint && selectedPoint.exprId===best.exprId && Math.abs(selectedPoint.x-best.x)<1e-9 && Math.abs(selectedPoint.y-best.y)<1e-9 && selectedPoint.kind===best.kind){
@@ -3048,7 +3080,7 @@ canvas.addEventListener('click', e => {
     selectedPoint = null;
   }
   if(selectedPoint){
-    byId('readout').textContent = `(${fmt(selectedPoint.x)}, ${fmt(selectedPoint.y)})`;
+    byId('readout').textContent = `(${fmtExact(selectedPoint.x)}, ${fmtExact(selectedPoint.y)})`;
   } else if(hoverPoint){
     byId('readout').textContent = `(${fmt(hoverPoint.x)}, ${fmt(hoverPoint.y)})`;
   } else {
@@ -3079,6 +3111,7 @@ let derivOverlay=null;
 function drawAll(){
   const w=canvas.clientWidth,h=canvas.clientHeight;
   const vars = sliderValues();
+  featurePoints = computeFeaturePoints(vars);
   ctx.clearRect(0,0,w,h);
   drawGrid();
   if(slopeField.active) drawSlopeField();
@@ -3257,7 +3290,7 @@ function drawAll(){
     const lightMode = document.body.classList.contains('theme-light');
     ctx.fillStyle = lightMode ? '#000' : '#fff';
     ctx.font = '12px system-ui, Arial';
-    const label = `(${fmt(selectedPoint.x)}, ${fmt(selectedPoint.y)})`;
+    const label = `(${fmtExact(selectedPoint.x)}, ${fmtExact(selectedPoint.y)})`;
     const labelX = Math.min(canvas.clientWidth - 6 - ctx.measureText(label).width, px + 12);
     const labelY = Math.max(12, py - 8);
     ctx.fillText(label, labelX, labelY);
@@ -3265,9 +3298,10 @@ function drawAll(){
   }
 
   drawAxes();
+  drawFeatureMarkers(featurePoints);
 
   if(selectedPoint){
-    byId('readout').textContent = `(${fmt(selectedPoint.x)}, ${fmt(selectedPoint.y)})`;
+    byId('readout').textContent = `(${fmtExact(selectedPoint.x)}, ${fmtExact(selectedPoint.y)})`;
   } else if(hoverPoint){
     byId('readout').textContent = `(${fmt(hoverPoint.x)}, ${fmt(hoverPoint.y)})`;
   }
@@ -3309,6 +3343,266 @@ function drawAxes(){
   const step=prettyStep(view.xmax-view.xmin);
   for(let x=Math.ceil(view.xmin/step)*step; x<=view.xmax; x+=step) ctx.fillText(fmt(x), sx(x)+4, sy(0)+24);
   for(let y=Math.ceil(view.ymin/step)*step; y<=view.ymax; y+=step) ctx.fillText(fmt(y), sx(0)+10, sy(y)-4);
+  ctx.restore();
+}
+
+function computeFeaturePoints(vars){
+  const pts=[];
+  const spanX=view.xmax-view.xmin, spanY=view.ymax-view.ymin;
+  if(spanX<=0||spanY<=0) return pts;
+  const cartExprs=exprs.filter(e=>e.on&&e.mode==='cart'&&(e.text||'').trim()&&!isImplicitExpression(e.text));
+  if(!cartExprs.length) return pts;
+
+  const sampleCount=Math.max(120, Math.min(420, Math.floor((precisions[quality]||800)/3)));
+  const step=spanX/sampleCount;
+  const xs=Array.from({length:sampleCount+1},(_,i)=>view.xmin+i*step);
+  const xTol=Math.max(1e-6, spanX/600);
+  const yTol=Math.max(1e-6, spanY/600);
+
+  const refineRoot = (fn,a,b)=>{
+    if(!Number.isFinite(a)||!Number.isFinite(b)||a===b) return NaN;
+    const fa=safeEvalWithClamp(fn,a,1e8), fb=safeEvalWithClamp(fn,b,1e8);
+    if(!Number.isFinite(fa)||!Number.isFinite(fb)) return NaN;
+    if(fa===0) return a;
+    if(fb===0) return b;
+    if(fa*fb>0){
+      const mid=(a+b)/2;
+      const fm=safeEvalWithClamp(fn,mid,1e8);
+      if(Number.isFinite(fm) && ((fa>0)!==(fm>0))) { b=mid; }
+      else if(Number.isFinite(fm) && ((fb>0)!==(fm>0))) { a=mid; }
+      else return mid;
+    }
+    return bisect(fn,a,b,48,1e-10);
+  };
+
+  const refineExtremum = (fn,left,right,isMax)=>{
+    if(!Number.isFinite(left)||!Number.isFinite(right)||left>=right) return null;
+    const phi=(Math.sqrt(5)-1)/2;
+    let a=left, b=right;
+    let c=b-(b-a)*phi, d=a+(b-a)*phi;
+    const evalFn=(x)=>safeEvalWithClamp(fn,x,1e12);
+    for(let i=0;i<36;i++){
+      const fc=evalFn(c), fd=evalFn(d);
+      if(!Number.isFinite(fc)||!Number.isFinite(fd)) break;
+      if(isMax ? fc>fd : fc<fd){
+        b=d; d=c; c=b-(b-a)*phi;
+      }else{
+        a=c; c=d; d=a+(b-a)*phi;
+      }
+    }
+    const mid=(a+b)/2;
+    const y=evalFn(mid);
+    if(!Number.isFinite(y)) return null;
+    return {x:mid,y};
+  };
+
+  const fnMap=new Map();
+  const yMap=new Map();
+  const getFn=(id,text)=>{
+    if(fnMap.has(id)) return fnMap.get(id);
+    try{
+      const f=parseExprCart(text, vars);
+      fnMap.set(id,f);
+      return f;
+    }catch{
+      return null;
+    }
+  };
+
+  const refinePoint = (pt) => {
+    const out = {...pt};
+    const setIfFinite=(v)=>{ if(Number.isFinite(v)) out.y=snapSmall(v,1e-10); };
+    if(pt.kind==='xIntercept'){
+      const expr = exprs.find(z=>z.id===pt.exprId);
+      if(expr){
+        const f=getFn(expr.id, expr.text);
+        if(f){
+          const val = f(pt.x);
+          if(Number.isFinite(val)){
+            out.y=snapSmall(val,1e-10);
+          }
+        }
+      }
+    } else if(pt.kind==='yIntercept'){
+      const expr = exprs.find(z=>z.id===pt.exprId);
+      if(expr){
+        const f=getFn(expr.id, expr.text);
+        if(f){
+          const val = f(0);
+          setIfFinite(val);
+        }
+      }
+    } else if(pt.kind==='extrema'){
+      const expr = exprs.find(z=>z.id===pt.exprId);
+      if(expr){
+        const f=getFn(expr.id, expr.text);
+        if(f){
+          const val = f(pt.x);
+          setIfFinite(val);
+        }
+      }
+    } else if(pt.kind==='intersection' && Array.isArray(pt.exprIds) && pt.exprIds.length>=1){
+      const exprA = exprs.find(z=>z.id===pt.exprIds[0]);
+      if(exprA){
+        const fA=getFn(exprA.id, exprA.text);
+        if(fA){
+          const valA=fA(pt.x);
+          if(Number.isFinite(valA)) out.y=snapSmall(valA,1e-10);
+        }
+      }
+      if(!Number.isFinite(out.y) && pt.exprIds[1]){
+        const exprB = exprs.find(z=>z.id===pt.exprIds[1]);
+        if(exprB){
+          const fB=getFn(exprB.id, exprB.text);
+          if(fB){
+            const valB=fB(pt.x);
+            setIfFinite(valB);
+          }
+        }
+      }
+      if(Number.isFinite(out.y)){
+        const exprB = exprs.find(z=>z.id===pt.exprIds[1]);
+        if(exprA && exprB){
+          const fA=getFn(exprA.id, exprA.text);
+          const fB=getFn(exprB.id, exprB.text);
+          if(fA && fB){
+            const a=fA(pt.x), b=fB(pt.x);
+            if(Number.isFinite(a)&&Number.isFinite(b)) out.y=snapSmall((a+b)/2,1e-10);
+          }
+        }
+      }
+    }
+    return Number.isFinite(out.x) && Number.isFinite(out.y) ? out : null;
+  };
+
+  const addPoint = (pt) => {
+    if(!Number.isFinite(pt.x)||!Number.isFinite(pt.y)) return;
+    if(pt.x<view.xmin-1e-9||pt.x>view.xmax+1e-9||pt.y<view.ymin-1e-9||pt.y>view.ymax+1e-9) return;
+    const ref = refinePoint(pt);
+    if(!ref) return;
+    for(const p of pts){
+      const sameKind=p.kind===ref.kind;
+      const sameExpr = (p.exprId&&ref.exprId&&p.exprId===ref.exprId) ||
+        (p.exprIds&&ref.exprIds&&p.exprIds.length===ref.exprIds.length&&p.exprIds.every(id=>ref.exprIds.includes(id)));
+      if(sameKind && sameExpr && Math.abs(p.x-ref.x)<xTol && Math.abs(p.y-ref.y)<yTol) return;
+    }
+    pts.push(ref);
+  };
+
+  for(const e of cartExprs){
+    let f=null;
+    try{ f=parseExprCart(e.text, vars); }catch{ continue; }
+    fnMap.set(e.id, f);
+
+    const ys=xs.map(x=>safeEvalWithClamp(f,x,1e6));
+    yMap.set(e.id, ys);
+
+    if(view.xmin<=0 && view.xmax>=0){
+      const y0=safeEvalWithClamp(f,0,1e6);
+      if(y0!==null) addPoint({kind:'yIntercept', exprId:e.id, x:0, y:y0});
+    }
+
+    for(let i=1;i<ys.length;i++){
+      const yA=ys[i-1], yB=ys[i];
+      if(!Number.isFinite(yA)||!Number.isFinite(yB)) continue;
+      const xA=xs[i-1], xB=xs[i];
+      const nearZero = Math.abs(yA)<yTol ? xA : (Math.abs(yB)<yTol ? xB : null);
+      if(nearZero!==null){
+        const root=refineRoot(f,xA,xB);
+        const r=Number.isFinite(root)?root:nearZero;
+        addPoint({kind:'xIntercept', exprId:e.id, x:r, y:0});
+        continue;
+      }
+      if(yA*yB<0){
+        const root=bisect(f,xA,xB,36,1e-9);
+        if(Number.isFinite(root)) addPoint({kind:'xIntercept', exprId:e.id, x:root, y:0});
+      }
+    }
+
+    for(let i=1;i<ys.length-1;i++){
+      const y0=ys[i-1], y1=ys[i], y2=ys[i+1];
+      if(!Number.isFinite(y0)||!Number.isFinite(y1)||!Number.isFinite(y2)) continue;
+      if((y1>y0 && y1>y2) || (y1<y0 && y1<y2)){
+        const denom=y0-2*y1+y2;
+        let xPeak=xs[i], yPeak=y1;
+        if(Math.abs(denom)>1e-9){
+          const offset=(y0-y2)/(2*denom);
+          const candidate=xs[i]+offset*step;
+          if(Number.isFinite(candidate)){
+            const val=safeEvalWithClamp(f,candidate,1e6);
+            if(val!==null){ xPeak=candidate; yPeak=val; }
+          }
+        }
+        const ext=refineExtremum(f, xs[i-1], xs[i+1], y1>y0 && y1>y2);
+        const fx = ext?.x ?? xPeak;
+        const fy = ext?.y ?? yPeak;
+        addPoint({kind:'extrema', subtype:(y1>y0 && y1>y2)?'max':'min', exprId:e.id, x:fx, y:fy});
+      }
+    }
+  }
+
+  for(let i=0;i<cartExprs.length;i++){
+    for(let j=i+1;j<cartExprs.length;j++){
+      const e1=cartExprs[i], e2=cartExprs[j];
+      const ys1=yMap.get(e1.id), ys2=yMap.get(e2.id);
+      const f1=fnMap.get(e1.id), f2=fnMap.get(e2.id);
+      if(!ys1||!ys2||!f1||!f2) continue;
+      let prevDiff=null, prevX=null, lastAdded=null;
+      for(let k=0;k<xs.length;k++){
+        const a=ys1[k], b=ys2[k];
+        if(!Number.isFinite(a)||!Number.isFinite(b)){ prevDiff=null; prevX=null; continue; }
+        const diff=a-b;
+        if(prevDiff!==null){
+          const nearZeroBoth=Math.abs(diff)<yTol && Math.abs(prevDiff)<yTol;
+          const signChanged=(diff===0)||((diff>0)!==(prevDiff>0));
+          if((signChanged||nearZeroBoth) && prevX!==null){
+            const left=prevX, right=xs[k];
+            const g=x=>{
+              const v1=f1(x), v2=f2(x);
+              if(!Number.isFinite(v1)||!Number.isFinite(v2)) return NaN;
+              return v1-v2;
+            };
+            const root=bisect(g,left,right,40,1e-9);
+            const yVal=safeEvalWithClamp(f1,root,1e6);
+            if(Number.isFinite(root)&&yVal!==null){
+              const pairIds=[e1.id,e2.id].sort();
+              if(lastAdded===null || Math.abs(root-lastAdded)>xTol*2){
+                addPoint({kind:'intersection', exprId:pairIds.join('|'), exprIds:pairIds, x:root, y:yVal});
+                lastAdded=root;
+              }
+            }
+          }
+        }
+        prevDiff=diff;
+        prevX=xs[k];
+      }
+    }
+  }
+
+  return pts;
+}
+
+function drawFeatureMarkers(points){
+  if(!points||!points.length) return;
+  const light=document.body.classList.contains('theme-light');
+  const R = 6.5;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.45)';
+  ctx.shadowBlur=8;
+  ctx.shadowOffsetX=0;
+  ctx.shadowOffsetY=0;
+  points.forEach(pt=>{
+    const px=sx(pt.x), py=sy(pt.y);
+    if(!Number.isFinite(px)||!Number.isFinite(py)) return;
+    const color=FEATURE_COLORS[pt.kind]||'#ffffff';
+    ctx.beginPath();
+    ctx.fillStyle=color;
+    ctx.strokeStyle=light?'rgba(17,24,39,0.85)':'rgba(255,255,255,0.85)';
+    ctx.lineWidth=2.4;
+    ctx.arc(px, py, R, 0, TAU);
+    ctx.fill();
+    ctx.stroke();
+  });
   ctx.restore();
 }
 
@@ -3462,7 +3756,11 @@ byId('addExpr').onclick=()=>addExpr();
 byId('clearExpr').onclick=clearAll;
 byId('zoomIn').onclick=()=>zoomBy(0.8);
 byId('zoomOut').onclick=()=>zoomBy(1.25);
-byId('fitAll').onclick=()=>{view={...view,xmin:-10,xmax:10,ymin:-10,ymax:-10}; syncWindowInputs(); drawAll()};
+byId('fitAll').onclick=()=>{
+  view={xmin:-10,xmax:10,ymin:-10,ymax:10,grid:'normal',showGrid:true};
+  syncWindowInputs();
+  drawAll();
+};
 byId('toggleGrid').onclick=()=>{view.showGrid=!view.showGrid; drawAll()};
 function handleResetView(){
   view={xmin:-10,xmax:10,ymin:-10,ymax:10,grid:'normal',showGrid:true};
