@@ -801,10 +801,9 @@
 
     /* visuals*/
     .visuals-row{
-      display:flex;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
       gap:8px;
-      align-items:stretch; 
-      flex-wrap:nowrap; 
     }
 
     /* visuals buttons */
@@ -812,6 +811,7 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
+      white-space:nowrap;
       gap:.65rem;
       padding:.62rem .95rem;
       min-width:0;
@@ -1163,6 +1163,76 @@
       color: var(--ink-soft);
       font-size: 0.95rem;
       width: 100%;
+    }
+
+    @media (max-width:960px){
+      .canvas-shell{
+        padding-bottom:140px;
+        overflow:visible;
+      }
+    }
+
+    @media (max-width:820px){
+      .canvas-overlay{
+        padding:10px 10px 90px;
+        bottom:-110px;
+      }
+      .hud-row .hud-pill{
+        font-size:.78rem;
+        padding:.2rem .45rem;
+      }
+      .hud-bottom .legend{
+        flex-direction:column;
+        gap:6px;
+      }
+      .legend-item{
+        width:100%;
+      }
+    }
+
+    @media (max-width:780px){
+      .visuals-panel{
+        padding:8px;
+        gap:6px;
+      }
+      .visuals-btn{
+        font-size:.88rem;
+        min-height:60px;
+        padding:.5rem .8rem;
+      }
+      .visuals-btn svg{
+        padding:6px;
+        width:20px;
+        height:20px;
+      }
+    }
+
+    @media (max-width:840px){
+      .visuals-row{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    .visuals-row .visuals-btn{
+      padding:.6rem .85rem;
+      border-radius:12px;
+      box-shadow:0 8px 20px rgba(2,6,23,0.45);
+    }
+
+    @media (max-width:640px){
+      .visuals-row{
+        grid-template-columns:repeat(1,minmax(0,1fr));
+      }
+      .trail-controls{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      .trail-slider{
+        width:100%;
+      }
+      .trail-length-badge{
+        font-size:.74rem;
+      }
     }
   </style>
 </head>
