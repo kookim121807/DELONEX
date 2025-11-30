@@ -240,6 +240,7 @@ body.theme-light header{
 .brand{display:flex;align-items:center}
 .brand h1{margin:0;font-size:1.2rem;letter-spacing:.1em;text-transform:uppercase;font-weight:800}
 .header-actions{display:flex;gap:.5rem;margin-left:auto;align-items:center;flex-wrap:wrap}
+
 /* header button */
 .header-actions .btn{
   padding:.6rem 1.1rem;
@@ -1096,11 +1097,20 @@ tr:nth-child(even){background:rgba(255,255,255,.02)}
 .vol-card .vol-btn,
 .polar-area-card .polar-area-btn,
 .polar-area2-card .polar-area2-btn,
-.axis-vol-card .axis-vol-btn{
+.axis-vol-card .axis-vol-btn,
+.deriv-card .toggle-deriv-btn {
   margin-top:4px;
   align-self:flex-start;
+  /* match font, padding and sizing used by other operator buttons */
   font-size:.9rem;
   padding:.45rem .9rem;
+  min-height:44px;
+  height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  white-space:nowrap;
 }
 .def-int-card .def-int-bottom,
 .rs-card .rs-method-row{
@@ -1274,6 +1284,75 @@ body.theme-light .kb-tabs{
   color:var(--ink2);
   border-top:1px solid var(--edge);
 }
+.deriv-top{display:flex;flex-direction:column;gap:8px} 
+.deriv-top .deriv-input-group{display:flex;align-items:center;gap:10px;width:100%}
+.deriv-top .deriv-input-group span{flex:0 0 36px;color:var(--ink2);font-size:.9rem}
+.deriv-top .deriv-input-group select,
+.deriv-top .deriv-input-group input{
+  flex:1;
+  min-width:0;
+  padding:.6rem .5rem;
+  border-radius:10px;
+  margin-left:-6px; 
+}
+.deriv-top .deriv-input-group select{min-width:168px} 
+.deriv-top .deriv-input-group .deriv-btn{
+  margin-left:0;
+  margin-right:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  height:44px;
+  padding-left:14px;
+  padding-right:14px;
+  font-size:inherit;
+}
+
+.deriv-card .toggle-deriv-btn,
+.deriv-card .anti-btn {
+  margin-top:4px;
+  align-self:flex-start;
+  font-size:.9rem;
+  padding:.45rem .9rem;
+  min-height:44px;
+  height:44px;
+}
+
+.deriv-point-top{display:flex;flex-direction:column;gap:8px}
+.deriv-point-top .deriv-point-input{display:flex;align-items:center;gap:10px;width:100%}
+.deriv-point-top .deriv-point-input span{flex:0 0 36px;color:var(--ink2);font-size:.9rem}
+.deriv-point-top .deriv-point-input select,
+.deriv-point-top .deriv-point-input input{
+  flex:1;
+  min-width:0;
+  padding:.6rem .5rem;
+  border-radius:10px;
+  margin-left:-6px; 
+}
+
+.anti-top{ display:flex; flex-direction:column; gap:8px; }
+.anti-top .anti-input{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+}
+.anti-top .anti-input span{
+  flex:0 0 36px;
+  color:var(--ink2);
+  font-size:.9rem;
+}
+.anti-top .anti-input select,
+.anti-top .anti-input input{
+  flex:1;
+  min-width:0;
+  padding:.6rem .5rem;
+  border-radius:10px;
+  margin-left:-6px; 
+}
+.anti-top .anti-input select{ min-width:168px; }
+
 </style>
 </head>
 <body>
@@ -1455,6 +1534,34 @@ body.theme-light .kb-tabs{
               </div>
               <button id="doAvgRate" class="btn aroc-btn">Compute</button>
               <div id="avgRateOut" class="badge">AROC =</div>
+            </div>
+
+            <div class="card ml-card deriv-card" data-operator="derivative">
+              <h4>Derivative of a Function f(x) without a point</h4>
+              <div class="deriv-top">
+                <div class="deriv-input-group">
+                  <span>f(x)</span>
+                  <select id="dFuncExpr"></select>
+                </div>
+                <div class="deriv-input-group">
+                  <span>h</span>
+                  <input id="dFuncH" type="number" step="0.0001" value="0.0008">
+                </div>
+              </div>
+
+              <button id="toggleDerivPlot" type="button" class="btn toggle-deriv-btn">Toggle f′(x)</button>
+
+              <div class="hint" style="margin-top:6px">Button adds or removes a dashed derivative curve.</div>
+            </div>
+
+            <div class="card ml-card deriv-point-card" data-operator="derivative-point">
+              <h4>Derivative of a Function f(x) at a Point</h4>
+              <div class="deriv-point-top">
+                <div class="deriv-point-input"><span>f(x)</span><select id="derivPointExpr"></select></div>
+                <div class="deriv-point-input"><span>x</span><input id="derivPointX" type="number" value="0" step="0.1"></div>
+              </div>
+              <button id="doDerivPoint" class="btn deriv-point-btn">Derive</button>
+              <div id="derivPointOut" class="badge" style="margin-top:8px">m = </div>
             </div>
 
             <div class="card ml-card anti-card" data-operator="antiderivative">
@@ -1922,7 +2029,7 @@ function drawParam(e, vars) {
       else ctx.moveTo(X, Y);
       first = false; lastX = X; lastY = Y;
     } else {
-      first = true; lastX = null; lastY = null;
+      first = true; lastX = X; lastY = null;
     }
   }
 }
@@ -2065,7 +2172,7 @@ function normalizeExpressionSource(source){
    .replace(/\barctan\s*\(/gi,'atan(')
    .replace(/sin\s*\^\s*-?1\s*\(/gi,'asin(')
    .replace(/cos\s*\^\s*-?1\s*\(/gi,'acos(')
-   .replace(/tan\s*\^\s*-?1\s*\(/gi,'atan(')
+   .replace(/tan\s*\^\\s*-?1\s*\(/gi,'atan(')
    .replace(/\bsec\s*\(([^)]+)\)/gi,'(1/cos($1))')
    .replace(/\bcsc\s*\(([^)]+)\)/gi,'(1/sin($1))')
    .replace(/\bcot\s*\(([^)]+)\)/gi,'(cos($1)/sin($1))')
@@ -2190,11 +2297,33 @@ function pick(id){
   return exprs.find(e=>e.id===id) || null;
 }
 function derivative(f,x,h=1e-5){
-  if(typeof f!=='function') return NaN;
-  if(!Number.isFinite(h) || h<=0) h=1e-5;
-  return (f(x + h) - f(x - h)) / (2*h);
+  if(typeof f !== 'function') return NaN;
+  if(!Number.isFinite(h) || h<=0) h = 1e-5;
+
+  const safeEval = (v) => {
+    try { const r = f(v); return Number.isFinite(r) ? r : NaN; } catch { return NaN; }
+  };
+
+  const xp = x + h, xm = x - h;
+  const fp = safeEval(xp);
+  const fm = safeEval(xm);
+  if(Number.isFinite(fp) && Number.isFinite(fm)){
+    const c = (fp - fm) / (2*h);
+    if(Number.isFinite(c)) return c;
+  }
+
+  const f0 = safeEval(x);
+  if(Number.isFinite(fp) && Number.isFinite(f0)){
+    const fwd = (fp - f0) / h;
+    if(Number.isFinite(fwd)) return fwd;
+  }
+  if(Number.isFinite(f0) && Number.isFinite(fm)){
+    const bwd = (f0 - fm) / h;
+    if(Number.isFinite(bwd)) return bwd;
+  }
+  return NaN;
 }
-// Convergence Tool
+// Convergence Tool //
 const factorialInt = (n)=>{
   if(!Number.isInteger(n) || n<0) return NaN;
   let r=1;
@@ -2224,7 +2353,7 @@ function solveLinearSystem(A,b){
   return b;
 }
 function nthDerivativeNumeric(f,x0,order){
-  // Polynomial dy/dx
+  // Polynomial dy/dx //
   if(order===0) return f(x0);
   if(order<0 || !Number.isFinite(x0)) return NaN;
   const nodes=Math.max(order+3,7);
@@ -2293,7 +2422,7 @@ function analyticAntiderivative(exprText){
     }
   }
 
-  // Derivatives of Inverse Trigonemtry Forms
+  // Derivatives of Inverse Trigonemtry Forms //
   if(norm==='1/sqrt(1-x^2)' || norm==='(1-x^2)^-0.5') return x=>Math.asin(x);
   if(norm==='-1/sqrt(1-x^2)' || norm==='-(1-x^2)^-0.5') return x=>Math.acos(x);
   if(norm==='1/(1+x^2)' || norm==='(1+x^2)^-1') return x=>Math.atan(x);
@@ -2318,7 +2447,7 @@ window.addEventListener('resize', resizeCanvas);
 
 /* expressions */
 const exprList = byId('exprList');
-const selects = ['tableExpr','limitExpr','avgRateExpr','areaExpr1','areaExpr2','intExpr','rsExpr','antiExpr','lenExpr','volExpr','volExpr2','polarAreaExpr1','polarAreaExpr2','paramExpr','tsExpr'].map(byId);
+const selects = ['tableExpr','limitExpr','avgRateExpr','areaExpr1','areaExpr2','intExpr','rsExpr','antiExpr','lenExpr','volExpr','volExpr2','polarAreaExpr1','polarAreaExpr2','paramExpr','tsExpr','dFuncExpr','derivPointExpr'].map(byId);
 let exprs=[];
 let activeExprId=null;
 
@@ -2431,7 +2560,7 @@ function renderExpr(e) {
   const topRow=document.createElement('div');
   topRow.className='expr-header-row';
   topRow.append(colorField, visField, del);
-  header.append(topRow, modeField);
+  header.append(topRow,modeField);
 
   const body=document.createElement('div');
   body.className='expr-body';
@@ -2721,7 +2850,6 @@ row1.append(
   pair('Step', stepI)
 );
 
-
   const row2=document.createElement('div');
   row2.className='row';
   const rng=document.createElement('input');
@@ -2860,6 +2988,7 @@ function bisect(fn, a, b, maxIter=40, tol=1e-9){
 }
 
 let antiOverlay=null;
+let derivOverlay=null;
 
 function drawAll(){
   const w=canvas.clientWidth,h=canvas.clientHeight;
@@ -2979,6 +3108,47 @@ function drawAll(){
       }
     }
   }
+
+  if(derivOverlay){
+    try{
+      const e = exprs.find(z=>z.id===derivOverlay.exprId);
+      if(e && e.on && e.mode==='cart' && (e.text||'').trim()){
+        const vars = sliderValues();
+        const f = parseExprCart(e.text, vars);
+
+        let analyticDeriv = null;
+        const txt = (e.text||'').trim().toLowerCase();
+
+        if(/^\s*(ln|log)\s*\(\s*x\s*\)\s*$/.test(txt)){
+          analyticDeriv = x => 1/x;
+        }
+
+        const N = (precisions[quality]||800);
+        const step = (view.xmax - view.xmin) / N;
+        ctx.save();
+        ctx.setLineDash([8,6]);
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = derivOverlay.color || (e.color || '#54e1b3');
+        ctx.beginPath();
+        let first=true;
+        for(let i=0;i<=N;i++){
+          const x = view.xmin + i*step;
+          const d = analyticDeriv ? safeEvalWithClamp(analyticDeriv, x, 1e12) : derivative(f, x, Math.max(1e-8, Number(derivOverlay.h||1e-5)));
+          if(Number.isFinite(d)){
+            const X = sx(x), Y = sy(d);
+            if(!first) ctx.lineTo(X,Y);
+            else ctx.moveTo(X,Y);
+            first=false;
+          } else {
+            first=true;
+          }
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+    }catch(err){}
+  }
+
   if(hoverPoint && Number.isFinite(hoverPoint.x) && Number.isFinite(hoverPoint.y)){
     ctx.save();
     const px = sx(hoverPoint.x), py = sy(hoverPoint.y);
@@ -2994,7 +3164,7 @@ function drawAll(){
     const px = sx(selectedPoint.x), py = sy(selectedPoint.y);
     ctx.beginPath();
     ctx.fillStyle = '#ffffff';
-    ctx.strokeStyle = '#0b1220';
+    ctx.strokeStyle = '#0b1120';
     ctx.lineWidth = 2;
     ctx.arc(px, py, 8, 0, TAU);
     ctx.fill(); ctx.stroke();
@@ -3206,7 +3376,7 @@ byId('addExpr').onclick=()=>addExpr();
 byId('clearExpr').onclick=clearAll;
 byId('zoomIn').onclick=()=>zoomBy(0.8);
 byId('zoomOut').onclick=()=>zoomBy(1.25);
-byId('fitAll').onclick=()=>{view={...view,xmin:-10,xmax:10,ymin:-10,ymax:10}; syncWindowInputs(); drawAll()};
+byId('fitAll').onclick=()=>{view={...view,xmin:-10,xmax:10,ymin:-10,ymax:-10}; syncWindowInputs(); drawAll()};
 byId('toggleGrid').onclick=()=>{view.showGrid=!view.showGrid; drawAll()};
 function handleResetView(){
   view={xmin:-10,xmax:10,ymin:-10,ymax:10,grid:'normal',showGrid:true};
@@ -3391,7 +3561,7 @@ function knownSeries(exprText, a, n){
         terms.push(`${coef==='1'?'':coef+'*'}x^-1`);
       } else {
         const coef = fmtPlain(c);
-        const pow = p===1?'':`^${p}`;
+        const pow = p===1 ? '' : `^${p}`;
         terms.push(`${coef==='1'?'':coef+'*'}x${pow}`);
       }
     });
@@ -3858,6 +4028,7 @@ const lettersLower = Array.from({length:26},(_,i)=>String.fromCharCode(97+i));
   ];
   const kb = byId('kb'), kbGrid = byId('kbGrid'), kbTabs = byId('kbTabs');
   let KB_COLS = 8;
+  let currentItems = [];
 
   function setDockSize(){
     layoutSquares();
@@ -3871,6 +4042,11 @@ const lettersLower = Array.from({length:26},(_,i)=>String.fromCharCode(97+i));
     cols = Math.max(minCols, Math.min(maxCols, cols));
     while(cols > minCols && ((gridWidth - (cols-1)*gap) / cols) < minSide){
       cols--;
+    }
+    if(cols !== KB_COLS && currentItems.length){
+      KB_COLS = cols;
+      render(currentItems);
+      return;
     }
     KB_COLS = cols;
     const side = Math.max(minSide, Math.min(maxSide, Math.floor((gridWidth - (cols-1)*gap)/cols)));
@@ -3919,6 +4095,7 @@ const lettersLower = Array.from({length:26},(_,i)=>String.fromCharCode(97+i));
   }
 
   function render(items){
+    currentItems=[...items];
     kbGrid.innerHTML='';
     const syms = [...items];
     const delIndex = syms.indexOf('⌫');
@@ -4192,19 +4369,9 @@ updateLegend();
       const dx = (b - a) / n;
       let sum = 0;
       if(method === 'trap'){
-        for(let i=0;i<n;i++){
-          const x1 = a + i*dx, x2 = a + (i+1)*dx;
-          const v1 = safe(()=>f(x1)), v2 = safe(()=>f(x2));
-          if(!Number.isFinite(v1) || !Number.isFinite(v2)){ sum = NaN; break; }
-          sum += 0.5*(v1+v2)*dx;
-        }
-      } else {
-        for(let i=0;i<n;i++){
-          let x = a + (method==='left' ? i*dx : method==='right' ? (i+1)*dx : (i+0.5)*dx);
-          const v = safe(()=>f(x));
-          if(!Number.isFinite(v)){ sum = NaN; break; }
-          sum += v * dx;
-        }
+        for(let i=0;i<n;i++){const x1=a+i*dx,x2=a+(i+1)*dx,v1=safe(()=>f(x1)),v2=safe(()=>f(x2));if(!Number.isFinite(v1)||!Number.isFinite(v2)){sum=NaN;break}sum+=0.5*(v1+v2)*dx}
+      }else{
+        for(let i=0;i<n;i++){let x=a+(method==='left'?i*dx:method==='right'?(i+1)*dx:(i+0.5)*dx);const v=safe(()=>f(x));if(!Number.isFinite(v)){sum=NaN;break}sum+=v*dx}
       }
       out.textContent = Number.isFinite(sum) ? `Σ = ${fmt(sum)}` : 'Σ = DNE';
     };
@@ -4504,8 +4671,58 @@ updateLegend();
     };
   })();
 
-})(); 
+  // Derivative of a Function f(x) without a Point //
+  (function(){
+    const toggleBtn = byId('toggleDerivPlot');
+    const hInput = byId('dFuncH');
+    if(toggleBtn){
+      toggleBtn.onclick = ()=>{
+        const sel = byId('dFuncExpr');
+        const e = sel ? pick(sel.value) : null;
+        if(!e || e.mode!=='cart' || isImplicitExpression(e.text)){
+          derivOverlay = null;
+          toggleBtn.classList.remove('active');
+          drawAll();
+          return;
+        }
+        const hVal = Math.max(1e-12, Number(hInput?.value) || 1e-5);
+        if(derivOverlay && derivOverlay.exprId===e.id){
+          derivOverlay = null;
+          toggleBtn.classList.remove('active');
+        } else {
+          derivOverlay = { exprId: e.id, h: hVal, color: e.color || '#54e1b3' };
+          toggleBtn.classList.add('active');
+        }
+        drawAll();
+      };
+    }
+  })();
 
+  // Derivative of a Function f(x) at a Point //
+  (function(){
+    const btn = byId('doDerivPoint'), out = byId('derivPointOut');
+    if(!btn || !out) return;
+    btn.onclick = ()=>{
+      const sel = byId('derivPointExpr');
+      const e = sel ? pick(sel.value) : null;
+
+      if(!e){ out.textContent='m = DNE'; return; }
+
+      if(e.mode!=='cart' || isImplicitExpression(e.text)){ out.textContent='m: Need explicit y=f(x)'; return; }
+
+      if(!(e.text||'').trim()){ out.textContent='m = DNE'; return; }
+
+      const x = Number((byId('derivPointX')||{}).value);
+      if(!Number.isFinite(x)){ out.textContent='m = DNE'; return; }
+
+      const f = parseExprCart(e.text, sliderValues());
+      const val = derivative(f, x, 1e-6);
+
+      out.textContent = Number.isFinite(val) ? `m = ${fmt(val)}` : 'm = DNE';
+    };
+  })();
+
+})();
 </script>
 
 </body>
