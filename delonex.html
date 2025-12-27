@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta id="themeColorMeta" name="theme-color" content="#0b1020" />
+  <title>DELONEX</title>
+
+  <link rel="icon" href="assets/delonex-mark.svg" type="image/svg+xml" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      
+      --bg0:#070a14;
+      --bg1:#0b1020;
+      --bg2:#0e1530;
+
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.045);
+      --edge: rgba(255,255,255,.10);
+      --edge2: rgba(255,255,255,.14);
+
+      --ink: #eaf1ff;
+      --mut: rgba(234,241,255,.70);
+
+      --a1:#54e1b3; 
+      --a2:#9bf6ff; 
+      --a3:#b388ff; 
+      --a4:#ffd166; 
+
+      --shadow: 0 22px 70px rgba(0,0,0,.42);
+      --shadow2: 0 16px 48px rgba(0,0,0,.30);
+
+      --r: 18px;
+      --r2: 22px;
+
+      --max: 1200px;
+
+      --bar: rgba(234,241,255,.92);
+    }
+
+    html[data-theme="light"]{
+      
+      --bg0:#f4f6ff;
+      --bg1:#eef2ff;
+      --bg2:#ffffff;
+
+      --panel: rgba(9,18,43,.05);
+      --panel2: rgba(9,18,43,.035);
+      --edge: rgba(9,18,43,.12);
+      --edge2: rgba(9,18,43,.16);
+
+      --ink:#09122b;
+      --mut: rgba(9,18,43,.68);
+
+      --a1:#0052ff;
+      --a2:#00c2ff;
+      --a3:#a855f7;
+      --a4:#ffb703;
+
+      --shadow: 0 18px 54px rgba(9,18,43,.14);
+      --shadow2: 0 14px 40px rgba(9,18,43,.10);
+
+      --bar: rgba(9,18,43,.90);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, Inter, "Segoe UI", Roboto, Helvetica, Arial;
+      color:var(--ink);
+      overflow-x:hidden;
+      background:
+        radial-gradient(1100px 740px at 12% -12%, rgba(84,225,179,.14), transparent 60%),
+        radial-gradient(1000px 700px at 88% -14%, rgba(155,246,255,.12), transparent 62%),
+        radial-gradient(900px 720px at 50% 120%, rgba(179,136,255,.10), transparent 58%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 45%, var(--bg2) 100%);
+      background-attachment: fixed;
+    }
+
+    a{color:inherit; text-decoration:none}
+    button{font:inherit; color:inherit; border:0; background:transparent; cursor:pointer}
+
+    .wrap{max-width:var(--max); margin:0 auto; padding:0 16px}
+
+    
+    .noise{
+      pointer-events:none;
+      position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.10'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+      opacity:.12;
+      transform: translateZ(0);
+    }
+    .scan{
+      pointer-events:none;
+      position:fixed; inset:0;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,.05), transparent);
+      opacity:.16;
+      animation: scan 9s linear infinite;
+      transform: translateZ(0);
+    }
+    @keyframes scan{
+      0%{ transform: translateY(-120%); }
+      100%{ transform: translateY(120%); }
+    }
+
+    
+    header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: saturate(140%) blur(10px);
+      background: linear-gradient(180deg, rgba(10,14,32,.86), rgba(10,14,32,.18));
+      border-bottom:1px solid var(--edge);
+    }
+    html[data-theme="light"] header{
+      background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.32));
+    }
+
+    .header-inner{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:12px 16px;
+      display:grid;
+      grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+      gap:12px;
+      align-items:center;
+      width:100%;
+      position:relative;
+    }
+
+    .nav-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      min-width:0;
+    }
+    .nav-row.nav-desktop{
+      flex-wrap:nowrap;
+      white-space:nowrap;
+    }
+    .header-inner > .nav-row.nav-desktop{
+      grid-column:1;
+    }
+
+    .navbtn{
+      padding:.55rem .84rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      font-weight:700;
+      font-size:.92rem;
+      letter-spacing:.18px;
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      white-space:nowrap;
+    }
+    .navbtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(155,246,255,.34);
+      box-shadow: 0 14px 36px rgba(0,0,0,.12);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      min-width:0;
+      justify-self:center;
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%, -50%);
+      z-index:2;
+    }
+    .mark{
+      width:46px; height:46px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 10px 26px rgba(0,0,0,.28), 0 0 0 1px rgba(255,255,255,.06), var(--shadow2);
+      background:
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,0.92), rgba(255,255,255,0.18) 32%, transparent 48%),
+        conic-gradient(from 210deg, #6ee7b7, #7ac6ff, #c9a0ff, #f6c17c, #5ef3c2, #7ac6ff);
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      padding:6px;
+      color:#041017;
+    }
+    .mark svg{
+      width:100%;
+      height:100%;
+      max-width:32px;
+      max-height:32px;
+    }
+
+    .brand-txt{
+      display:flex;
+      flex-direction:column;
+      line-height:1.05;
+    }
+    .brand-txt .name{
+      font-family:"Playfair Display", ui-serif, Georgia, serif;
+      font-weight:700;
+      letter-spacing:.2px;
+      font-size:1.12rem;
+    }
+    .brand-txt .sub{
+      font-size:.84rem;
+      color:var(--mut);
+      letter-spacing:.18px;
+      font-weight:600;
+    }
+
+    .right{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      align-items:center;
+      flex-wrap:nowrap;
+      min-width:0;
+      justify-self:end;
+      grid-column:3;
+    }
+
+    .theme-toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:.55rem .88rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      font-weight:800;
+    }
+    .theme-toggle.is-light{
+      border-color: rgba(84,225,179,.52);
+      box-shadow: 0 0 0 4px rgba(84,225,179,.10);
+    }
+
+    .hamburger{
+      display:none;
+      width:46px; height:46px;
+      border:1px solid rgba(155,246,255,.25);
+      border-radius:50%;
+      background:
+        radial-gradient(80% 80% at 30% 25%, rgba(255,255,255,.28), transparent 55%),
+        radial-gradient(120% 120% at 70% 70%, rgba(84,225,179,.18), transparent 60%),
+        linear-gradient(180deg, var(--panel), var(--panel2));
+      position:relative;
+      overflow:hidden;
+      box-shadow:
+        0 8px 22px rgba(0,0,0,.28),
+        0 0 0 6px rgba(84,225,179,.08),
+        0 0 18px rgba(84,225,179,.25);
+    }
+    .hamburger::after{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(circle, rgba(155,246,255,.28), transparent 62%);
+      opacity:.6;
+      pointer-events:none;
+    }
+    .hamburger svg{
+      width:20px; height:20px;
+      display:block;
+      margin:0 auto;
+      stroke:var(--bar);
+      fill:rgba(248,250,252,.92);
+      stroke-width:1.2;
+    }
+
+    .sr-only{
+      position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+      overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+    }
+
+    
+    .subnav{
+      border-top:1px solid var(--edge);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      display:none;
+    }
+    html[data-theme="light"] .subnav{
+      background: linear-gradient(180deg, rgba(9,18,43,.03), rgba(9,18,43,.02));
+    }
+    .subnav[data-open="true"]{display:block}
+
+    .subnav .wrap{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:12px 16px 14px;
+      display:grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items:center;
+      gap:10px;
+    }
+    .subhint{
+      color:var(--mut);
+      font-size:.90rem;
+      font-weight:800;
+      letter-spacing:.18px;
+      user-select:none;
+      justify-self:start;
+    }
+    .subcenter{
+      justify-self:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .subspacer{
+      justify-self:end;
+      opacity:0;
+      user-select:none;
+    }
+
+    .subpill{
+      padding:.62rem 1.02rem;
+      border-radius:999px;
+      border:1px solid var(--edge2);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      font-weight:900;
+      letter-spacing:.18px;
+      transition: transform .15s ease, border-color .15s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+    .subpill:hover{ transform: translateY(-1px); border-color: rgba(84,225,179,.46); }
+
+    
+    .drawer{
+      display:none;
+      position:absolute;
+      right:16px;
+      top:calc(100% + 10px);
+      border:1px solid var(--edge);
+      border-radius:14px;
+      padding:6px;
+      background: linear-gradient(180deg, rgba(10,16,32,.94), rgba(5,10,24,.9));
+      box-shadow:0 16px 40px rgba(0,0,0,.32);
+    }
+    html[data-theme="light"] .drawer{
+      background: linear-gradient(180deg, rgba(249,250,251,.98), rgba(226,232,240,.95));
+      border-color:rgba(148,163,184,.45);
+      box-shadow:0 12px 30px rgba(15,23,42,.12);
+    }
+    .drawer[data-open="true"]{display:block}
+    .drawer .wrap{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:center;
+      justify-content:center;
+    }
+    .drawer .navbtn,
+    .drawer .theme-toggle{
+      width:128px;
+      min-height:52px;
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:.92rem;
+      line-height:1.2;
+      text-align:center;
+      white-space:normal;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 5px 12px rgba(0,0,0,.16);
+    }
+    .drawer .navbtn{
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .drawer .theme-toggle{
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow:0 5px 12px rgba(0,0,0,.16);
+      font-size:1.35rem;
+    }
+
+    
+    main{ padding:22px 0 48px; }
+
+    
+    .hero{ position:relative; padding:26px 0 18px; }
+    .hero-shell{
+      border:1px solid var(--edge);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+        radial-gradient(900px 620px at 20% 15%, rgba(84,225,179,.14), transparent 55%),
+        radial-gradient(900px 620px at 85% 25%, rgba(155,246,255,.12), transparent 55%),
+        radial-gradient(900px 620px at 60% 110%, rgba(179,136,255,.10), transparent 55%);
+    }
+    .hero-shell::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background:
+        linear-gradient(90deg, transparent 0 12px, rgba(255,255,255,.06) 12px 13px, transparent 13px 26px),
+        linear-gradient(180deg, transparent 0 14px, rgba(255,255,255,.05) 14px 15px, transparent 15px 28px);
+      opacity:.10;
+      pointer-events:none;
+      transform: translateZ(0);
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:16px;
+      align-items:stretch;
+      padding:18px;
+    }
+
+    .hero-left{ padding:10px 10px 12px 10px; min-width:0; }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:.36rem .72rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      color:var(--mut);
+      font-weight:700;
+      font-size:.86rem;
+      letter-spacing:.18px;
+    }
+    .pip{
+      width:10px; height:10px; border-radius:50%;
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      box-shadow: 0 0 0 5px rgba(84,225,179,.10);
+    }
+
+    .hero-title{
+      margin:12px 0 10px;
+      font-family:"Playfair Display", ui-serif, Georgia, serif;
+      font-size:2.65rem;
+      line-height:1.05;
+      letter-spacing:-.4px;
+    }
+    .hero-sub{
+      margin:0;
+      color:var(--mut);
+      line-height:1.7;
+      font-size:1.02rem;
+      max-width:80ch;
+    }
+
+    .cta{
+      margin-top:14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .btn{
+      padding:.78rem 1.05rem;
+      border-radius:16px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      font-weight:900;
+      letter-spacing:.18px;
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(155,246,255,.34);
+      box-shadow: 0 18px 46px rgba(0,0,0,.14);
+    }
+    .btn.acc{
+      border-color: rgba(84,225,179,.52);
+      background:
+        radial-gradient(140% 140% at 20% 0%, rgba(84,225,179,.20), transparent 55%),
+        linear-gradient(135deg, rgba(84,225,179,.10), rgba(155,246,255,.06));
+    }
+
+    .hint{
+      color:var(--mut);
+      font-size:.92rem;
+      letter-spacing:.10px;
+      font-weight:700;
+    }
+    .founder-block{
+      margin-top:12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      max-width:62ch;
+    }
+    .founder-copy{
+      margin:0;
+      color:var(--mut);
+      font-size:.92rem;
+      line-height:1.65;
+      font-weight:400;
+    }
+
+    
+    .telemetry{
+      border:1px solid var(--edge);
+      border-radius: var(--r2);
+      background: linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.04));
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+    }
+    html[data-theme="light"] .telemetry{
+      background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(255,255,255,.52));
+    }
+
+    .telemetry-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+    .telemetry-top .t{
+      font-weight:900;
+      letter-spacing:.18px;
+    }
+    .chips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .chip{
+      padding:.34rem .58rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      color:var(--mut);
+      font-weight:800;
+      font-size:.82rem;
+      letter-spacing:.16px;
+    }
+
+    .bars{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .barrow{
+      display:grid;
+      grid-template-columns: 110px 1fr 70px;
+      gap:10px;
+      align-items:center;
+      min-width:0;
+    }
+    .barrow .k{
+      color:var(--mut);
+      font-weight:800;
+      font-size:.88rem;
+      letter-spacing:.14px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .track{
+      height:10px;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      overflow:hidden;
+    }
+    .fill{
+      height:100%;
+      width:0;
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(84,225,179,.95), rgba(155,246,255,.85), rgba(179,136,255,.75));
+      filter: saturate(120%);
+      transform-origin:left center;
+      animation: drift 4.6s ease-in-out infinite;
+    }
+    .fill.f1,
+    .fill.f2{
+      width:100%;
+    }
+    .fill.f3{
+      width:50%;
+      animation-duration: 4.1s;
+    }
+    .fill.f4{
+      width:0;
+      animation-duration: 5.8s;
+    }
+    @keyframes drift{
+      0%{ transform: scaleX(.96); opacity:.88; }
+      50%{ transform: scaleX(1.05); opacity:1; }
+      100%{ transform: scaleX(.96); opacity:.88; }
+    }
+    .barrow .v{
+      font-weight:900;
+      letter-spacing:.12px;
+      text-align:right;
+      white-space:nowrap;
+      color:var(--mut);
+    }
+
+    .telemetry-foot{
+      margin-top:12px;
+      border-top:1px dashed rgba(255,255,255,.14);
+      padding-top:10px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+      color:var(--mut);
+      font-size:.92rem;
+      line-height:1.5;
+    }
+    html[data-theme="light"] .telemetry-foot{
+      border-top-color: rgba(9,18,43,.14);
+    }
+
+    .robot-panel{
+      border:1px solid var(--edge);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      padding:14px;
+      overflow:hidden;
+      position:relative;
+    }
+    html[data-theme="light"] .robot-panel{
+      border-color:rgba(9,18,43,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.60));
+    }
+    .robot-label{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.38rem .9rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+      font-weight:800;
+      letter-spacing:.2px;
+      color:var(--mut);
+      margin-bottom:10px;
+    }
+    .robot-hint{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.32rem .6rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      color:var(--mut);
+      font-weight:700;
+      letter-spacing:.16px;
+      margin-bottom:12px;
+    }
+    .fractal-panel{
+      border:1px solid var(--edge);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      padding:14px;
+      overflow:hidden;
+      position:relative;
+      min-height:240px;
+    }
+    html[data-theme="light"] .fractal-panel{
+      border-color:rgba(9,18,43,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.72));
+    }
+    .fractal-label{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:.38rem .9rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+      font-weight:800;
+      letter-spacing:.2px;
+      color:var(--mut);
+      margin-bottom:10px;
+    }
+    .fractal-hint{
+      color:var(--mut);
+      font-weight:700;
+      letter-spacing:.12px;
+      margin-bottom:8px;
+      font-size:.85rem;
+    }
+    .fractal-canvas{
+      width:100%;
+      height:200px;
+      position:relative;
+    }
+    canvas#fractalAnim{
+      width:100%;
+      height:100%;
+      display:block;
+      cursor:crosshair;
+    }
+    @media (max-width: 640px){
+      .robot-canvas{
+        height:180px;
+      }
+    }
+
+    
+    .section{ margin-top:18px; }
+    .section-title{
+      margin:0 0 10px;
+      font-weight:900;
+      letter-spacing:.18px;
+      color:var(--mut);
+      text-transform:uppercase;
+      font-size:.92rem;
+    }
+
+    
+    .briefs{
+      border:1px solid var(--edge);
+      border-radius: var(--r2);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+    }
+    .briefs::before{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(900px 520px at 12% 18%, rgba(84,225,179,.10), transparent 60%),
+        radial-gradient(900px 520px at 86% 22%, rgba(155,246,255,.09), transparent 62%),
+        radial-gradient(900px 520px at 52% 120%, rgba(179,136,255,.08), transparent 60%);
+      opacity:.9;
+    }
+    .briefs-inner{
+      position:relative;
+      padding:16px;
+    }
+    .brief-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+    .brief{
+      border:1px solid var(--edge);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      padding:14px;
+      min-width:0;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .brief:hover{
+      transform: translateY(-1px);
+      border-color: rgba(155,246,255,.34);
+      box-shadow: 0 18px 52px rgba(0,0,0,.14);
+    }
+    .brief::after{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.10), transparent 55%);
+      transform: rotate(18deg);
+      opacity:.55;
+      pointer-events:none;
+    }
+    .brief-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      position:relative;
+      z-index:1;
+    }
+    .brief h3{
+      margin:0;
+      font-size:1.14rem;
+      font-weight:900;
+      letter-spacing:.18px;
+    }
+    .tag{
+      padding:.34rem .60rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      color:var(--mut);
+      font-weight:800;
+      font-size:.82rem;
+      letter-spacing:.14px;
+      white-space:nowrap;
+      position:relative;
+      z-index:1;
+    }
+    .brief p{
+      margin:10px 0 0;
+      color:var(--mut);
+      line-height:1.7;
+      position:relative;
+      z-index:1;
+    }
+    .brief-contact{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
+      border:1px solid rgba(255,255,255,.08);
+      font-size:.85rem;
+      color:var(--mut);
+      line-height:1.4;
+    }
+    html[data-theme="light"] .brief-contact{
+      background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.72));
+      border:1px solid rgba(9,18,43,.12);
+      color:rgba(9,18,43,.72);
+    }
+    .brief-contact-section{
+      margin-top:8px;
+    }
+    .brief-badges{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      position:relative;
+      z-index:1;
+    }
+    .bb{
+      padding:.32rem .56rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      color:var(--mut);
+      font-weight:800;
+      font-size:.80rem;
+      letter-spacing:.12px;
+    }
+
+    
+    .stack{ display:flex; flex-direction:column; gap:14px; }
+
+    .module{
+      border:1px solid var(--edge);
+      border-radius: var(--r2);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+      transform: translateZ(0);
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+      will-change: transform;
+    }
+    .module:hover{
+      border-color: rgba(155,246,255,.34);
+      box-shadow: 0 24px 68px rgba(0,0,0,.22);
+    }
+
+    .module::before{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(900px 520px at 14% 18%, var(--ga), transparent 58%),
+        radial-gradient(900px 520px at 86% 22%, var(--gb), transparent 60%),
+        radial-gradient(900px 520px at 50% 130%, var(--gc), transparent 58%);
+      opacity:.95;
+    }
+
+    .module-inner{
+      position:relative;
+      display:grid;
+      grid-template-columns: 190px minmax(0,1fr);
+      gap:14px;
+      padding:16px;
+      align-items:stretch;
+    }
+
+    .logo{
+      border:1px solid var(--edge);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      display:grid;
+      place-items:center;
+      position:relative;
+      overflow:hidden;
+      width: 190px;
+      height: 190px;
+      aspect-ratio: 1 / 1;
+      cursor:pointer;
+      transition: transform .16s ease, border-color .16s ease;
+      align-self:center;
+      justify-self:center;
+    }
+    .module:hover .logo{
+      transform: translateY(-1px);
+      border-color: rgba(84,225,179,.40);
+    }
+
+    .logo img{
+      width:96px;
+      height:96px;
+      object-fit:contain;
+      filter: drop-shadow(0 14px 32px rgba(0,0,0,.20));
+    }
+
+    .atomos-mark{
+      width:96px; height:96px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,.9), rgba(255,255,255,.12) 32%, transparent 45%),
+        conic-gradient(from 200deg,#6ee7b7,#7ac6ff,#c9a0ff,#f6c17c,#5ef3c2,#7ac6ff);
+      color:#0c1220;
+      font-weight:900;
+      box-shadow:0 6px 18px rgba(0,0,0,.32), 0 0 0 1px rgba(255,255,255,.04), var(--shadow);
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .atomos-mark svg{
+      width:70%;
+      height:70%;
+    }
+    .chronos-orb{
+      width:96px;
+      height:96px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,.9), rgba(255,255,255,.12) 32%, transparent 45%),
+        conic-gradient(from 200deg,#6ee7b7,#7ac6ff,#c9a0ff,#f6c17c,#5ef3c2,#7ac6ff);
+      color:#0c1220;
+      font-weight:900;
+      letter-spacing:.06em;
+      box-shadow:0 6px 18px rgba(0,0,0,.32), 0 0 0 1px rgba(255,255,255,.04), var(--shadow);
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      transform:translateZ(0);
+    }
+    .chronos-orb svg{
+      width:74%;
+      height:74%;
+    }
+
+    .body{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .topline{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .name{
+      margin:0;
+      font-size:1.38rem;
+      font-weight:900;
+      letter-spacing:.18px;
+    }
+    .badge2{
+      padding:.36rem .64rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      color:var(--mut);
+      font-weight:800;
+      font-size:.84rem;
+      letter-spacing:.14px;
+      white-space:nowrap;
+    }
+
+    .desc{
+      margin:0;
+      color:var(--mut);
+      line-height:1.7;
+      font-size:1.00rem;
+      max-width:90ch;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+
+    .pill{
+      padding:.62rem .92rem;
+      border-radius:999px;
+      border:1px solid var(--edge);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      font-weight:900;
+      letter-spacing:.14px;
+      transition: transform .15s ease, border-color .15s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+    .pill:hover{ transform: translateY(-1px); border-color: rgba(155,246,255,.34); }
+    .pill.acc{
+      border-color: rgba(84,225,179,.52);
+      background:
+        radial-gradient(140% 140% at 20% 0%, rgba(84,225,179,.18), transparent 55%),
+        linear-gradient(135deg, rgba(84,225,179,.10), rgba(155,246,255,.06));
+    }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+      margin-top:2px;
+    }
+    .stat{
+      border:1px solid var(--edge);
+      border-radius: 16px;
+      padding:10px 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      min-width:0;
+    }
+    .stat .k{
+      color:var(--mut);
+      font-weight:800;
+      font-size:.86rem;
+      letter-spacing:.14px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .stat .v{
+      margin-top:6px;
+      font-weight:900;
+      letter-spacing:.12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    details.more{
+      border:1px solid var(--edge);
+      border-radius: 16px;
+      padding:10px 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    details.more > summary{
+      list-style:none;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-weight:900;
+      letter-spacing:.14px;
+      color:var(--mut);
+    }
+    details.more > summary::-webkit-details-marker{display:none}
+    details.more ul{
+      margin:10px 0 0 18px;
+      color:var(--mut);
+      line-height:1.75;
+    }
+
+    
+    .work{
+      border:1px solid var(--edge);
+      border-radius: var(--r2);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+    }
+    .work::before{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(900px 520px at 18% 30%, rgba(255,209,102,.10), transparent 60%),
+        radial-gradient(900px 520px at 85% 25%, rgba(155,246,255,.09), transparent 62%),
+        radial-gradient(900px 520px at 60% 120%, rgba(84,225,179,.08), transparent 60%);
+      opacity:.95;
+    }
+    .work-inner{ position:relative; padding:16px; }
+    .work-grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:12px;
+      margin-top:10px;
+    }
+    .work-card{
+      border:1px solid var(--edge);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      padding:14px;
+      min-width:0;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+    .work-card:hover{
+      transform: translateY(-1px);
+      border-color: rgba(155,246,255,.34);
+      box-shadow: 0 18px 52px rgba(0,0,0,.14);
+    }
+    .work-card h3{
+      margin:0;
+      font-size:1.05rem;
+      font-weight:900;
+      letter-spacing:.16px;
+    }
+    .work-card p{
+      margin:10px 0 0;
+      color:var(--mut);
+      line-height:1.7;
+    }
+    .work-actions{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    
+    .feedback{
+      margin-top:18px;
+      border:1px solid var(--edge);
+      border-radius: var(--r2);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+    }
+    .feedback::before{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(900px 520px at 20% 20%, rgba(155,246,255,.10), transparent 60%),
+        radial-gradient(900px 520px at 80% 20%, rgba(179,136,255,.08), transparent 60%);
+      opacity:.9;
+    }
+    .feedback-inner{
+      position:relative;
+      padding:16px;
+      display:grid;
+      gap:12px;
+    }
+    .feedback-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+    .feedback-field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .feedback-field.full{
+      grid-column:1 / -1;
+    }
+    .feedback-field label{
+      font-weight:800;
+      letter-spacing:.12px;
+      font-size:.88rem;
+      color:var(--mut);
+    }
+    .feedback-field input,
+    .feedback-field select,
+    .feedback-field textarea{
+      border:1px solid var(--edge);
+      border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      color:var(--ink);
+      padding:.6rem .75rem;
+      font:inherit;
+    }
+    .feedback-field textarea{
+      min-height:120px;
+      resize:vertical;
+      line-height:1.6;
+    }
+    .feedback-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    
+    .site-footer{
+      margin-top:18px;
+      border-top:1px solid var(--edge);
+      padding:22px 0 10px;
+    }
+    .footer-shell{
+      border:1px solid var(--edge);
+      border-radius: var(--r2);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    .footer-inner{
+      padding:18px 16px;
+      display:grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    .footer-brand{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .footer-brand .mini-mark{
+      width:44px; height:44px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,0.92), rgba(255,255,255,0.18) 32%, transparent 48%),
+        conic-gradient(from 210deg, #6ee7b7, #7ac6ff, #c9a0ff, #f6c17c, #5ef3c2, #7ac6ff);
+      box-shadow:0 10px 26px rgba(0,0,0,.28), 0 0 0 1px rgba(255,255,255,.06), var(--shadow2);
+      flex:0 0 auto;
+      display:grid;
+      place-items:center;
+      padding:6px;
+      color:#041017;
+    }
+    .footer-brand .mini-mark svg{
+      width:100%;
+      height:100%;
+      max-width:26px;
+      max-height:26px;
+    }
+    .footer-brand h3{
+      margin:0;
+      font-family:"Playfair Display", ui-serif, Georgia, serif;
+      font-weight:800;
+      letter-spacing:.18px;
+    }
+    .footer-brand p{
+      margin:6px 0 0;
+      color:var(--mut);
+      line-height:1.65;
+      max-width:52ch;
+      font-size:.95rem;
+    }
+
+    .footer-col h4{
+      margin:0 0 10px;
+      text-transform:uppercase;
+      letter-spacing:.18px;
+      font-weight:900;
+      color:var(--mut);
+      font-size:.90rem;
+    }
+    .footer-links{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .footer-subnote{
+      margin-top:4px;
+      font-size:.78rem;
+      color:var(--mut);
+      letter-spacing:.08px;
+      text-decoration:none;
+    }
+    .footer-subnote:hover{
+      color:rgba(155,246,255,.9);
+    }
+    .footer-subnote[hidden]{
+      display:none;
+    }
+    .footer-links a,
+    .footer-links button{
+      padding:0;
+      border-radius:0;
+      border:0;
+      background:none;
+      font-weight:900;
+      letter-spacing:.14px;
+      transition: color .15s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+    .footer-links a:hover,
+    .footer-links button:hover{
+      color:rgba(155,246,255,.9);
+    }
+    .footer-bottom{
+      border-top:1px solid var(--edge);
+      padding:12px 16px;
+      color:var(--mut);
+      font-size:.92rem;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+    }
+
+    
+    @media (max-width: 1140px){
+      .nav-desktop{display:none}
+      .hamburger{display:inline-grid; place-items:center}
+      .hero-grid{ grid-template-columns:1fr; }
+      .hero-title{ font-size:2.15rem; }
+      .module-inner{ grid-template-columns:1fr; }
+      .logo{ min-height:140px; }
+      .grid3{ grid-template-columns:1fr; }
+      .brief-grid{ grid-template-columns: 1fr; }
+      .work-grid{ grid-template-columns: 1fr; }
+      .feedback-grid{ grid-template-columns: 1fr; }
+      .footer-inner{ grid-template-columns: 1fr; }
+      .subnav .wrap{ grid-template-columns: 1fr; justify-items:center; }
+      .subhint{ justify-self:center; }
+      .subspacer{ display:none; }
+    }
+    @media (min-width: 1141px){
+      .drawer{display:none !important;}
+    }
+
+    :focus-visible{
+      outline:2px solid rgba(155,246,255,.75);
+      outline-offset:2px;
+      border-radius:12px;
+    }
+    .reveal-alt{
+      opacity:0;
+      transform:translateX(-20px);
+      filter:blur(4px);
+    }
+    .reveal-alt.r{
+      transform:translateX(20px);
+    }
+    body.reveal-on-alt .reveal-alt{
+      animation:revealSlide .8s ease forwards;
+      animation-delay:var(--delay, 0s);
+    }
+    @keyframes revealSlide{
+      to{ opacity:1; transform:translateX(0); filter:blur(0); }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .reveal-alt{ opacity:1; transform:none; filter:none; }
+      body.reveal-on-alt .reveal-alt{ animation:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="scan" aria-hidden="true"></div>
+
+  <header>
+    <div class="header-inner">
+      
+      <div class="nav-row nav-desktop" aria-label="Primary programs">
+        
+        <button class="navbtn" type="button" id="navAtomos" aria-haspopup="true" aria-expanded="false">ATOMOS</button>
+        <button class="navbtn" type="button" id="navChronos" aria-haspopup="true" aria-expanded="false">CHRONOS</button>
+
+        
+        <button class="navbtn" type="button" id="navAidos" aria-disabled="false">AIDOS</button>
+        <button class="navbtn" type="button" id="navIlios" aria-disabled="false">ILIOS</button>
+
+        <button class="theme-toggle" type="button" id="themeToggle" aria-pressed="false" aria-label="Toggle theme">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+          <span class="sr-only">Toggle theme</span>
+        </button>
+      </div>
+
+      
+      <div class="brand" aria-label="DELONEX">
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="8" fill="#0a1224"/>
+            <path d="M5 12c3 0 4.2-5 7-5s4 5 7 5" stroke="#54e1b3" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M5 12c3 0 4.2 5 7 5s4-5 7-5" stroke="#38bdf8" stroke-width="1.2" stroke-linecap="round" opacity="0.9"/>
+            <circle cx="12" cy="12" r="2.2" fill="#f8fafc"/>
+          </svg>
+        </div>
+        <div class="brand-txt">
+          <div class="name">DELONEX</div>
+        </div>
+      </div>
+
+      
+      <div class="right">
+        <nav class="nav-row nav-desktop" aria-label="Company">
+          
+          <a class="navbtn" href="members.html">Members</a>
+          <a class="navbtn" href="positions.html">Positions</a>
+          <a class="navbtn" href="partnerships.html">Partnerships</a>
+          <a class="navbtn" href="contact.html">Contact</a>
+        </nav>
+
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+          <svg class="hamburger-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="6.5"></circle>
+            <circle cx="12" cy="12" r="9.2" fill="none"></circle>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    
+    <div class="subnav" id="subnav" data-open="false" aria-label="Secondary actions">
+      <div class="wrap" id="subnavWrap"></div>
+    </div>
+
+    
+    <div class="drawer" id="drawer" data-open="false" aria-label="Mobile menu">
+      <div class="wrap">
+        <button class="navbtn" type="button" id="mAtomos">ATOMOS</button>
+        <button class="navbtn" type="button" id="mChronos">CHRONOS</button>
+
+        
+        <button class="navbtn" type="button" id="mAidos">AIDOS</button>
+        <button class="navbtn" type="button" id="mIlios">ILIOS</button>
+
+        <button class="theme-toggle" type="button" id="themeToggleMobile" aria-pressed="false" aria-label="Toggle theme">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+          <span class="sr-only">Toggle theme</span>
+        </button>
+
+        <a class="navbtn" href="members.html">Members</a>
+        <a class="navbtn" href="positions.html">Positions</a>
+        <a class="navbtn" href="partnerships.html">Partnerships</a>
+        <a class="navbtn" href="contact.html">Contact</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    
+    <section class="hero" id="top">
+      <div class="hero-shell">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="badge"><span class="pip"></span>DELONEX • DELTA STEINER</div>
+            <h1 class="hero-title">Artificial Intelligence, Computer Science, Mathematics, and Physics Based Insitution</h1>
+            <p class="hero-sub">
+              Welcome to DELONEX! We are cutting-edge and non-profit institution dedicated to advancing the fields of AI, computer science, mathematics, and physics. Our mission is to foster innovation and drive progress through interdisciplinary coding, research and, collaboration.
+            </p>
+            <p class="hero-sub" style="margin-top:12px;">
+              Below click "Explore Programs" to acccess our products, click "Current Members" to see our team, and click "Contact" to ask us questions!
+            </p>
+            <div class="cta">
+              <a class="btn acc" href="#programs">Explore programs</a>
+              <a class="btn acc" href="members.html">Current Members</a>
+              <a class="btn acc" href="contact.html">Contact Us</a>
+            </div>
+            <div class="founder-block">
+              <span class="hint">Message From The Founder</span>
+              <p class="founder-copy">
+                I am excited to open our company this December. Our goal is to create meaningful opportunities for educators and students to engage, learn, and collaborate through our products and programs. As a computer scientist and mathematician, this business is driven by my passion to impact the STEM community in positive ways. I am excited to keep expanding DELONEX with that passion.
+              </p>
+            </div>
+          </div>
+
+          <aside class="telemetry" aria-label="System telemetry">
+            <div class="telemetry-top">
+              <div class="t">System Activations</div>
+              <div class="chips">
+                <span class="chip">ATOMOS</span>
+                <span class="chip">CHRONOS</span>
+                <span class="chip">AIDOS</span>
+              </div>
+            </div>
+
+            <div class="bars" aria-hidden="true">
+              <div class="barrow">
+                <div class="k">ATOMOS</div>
+                <div class="track"><div class="fill f1"></div></div>
+                <div class="v">ACTIVE</div>
+              </div>
+              <div class="barrow">
+                <div class="k">CHRONOS</div>
+                <div class="track"><div class="fill f2"></div></div>
+                <div class="v">ACTIVE</div>
+              </div>
+              <div class="barrow">
+                <div class="k">AIDOS</div>
+                <div class="track"><div class="fill f3"></div></div>
+                <div class="v">READY</div>
+              </div>
+              <div class="barrow">
+                <div class="k">ILIOS</div>
+                <div class="track"><div class="fill f4"></div></div>
+                <div class="v">TBD</div>
+              </div>
+            </div>
+
+            <div class="telemetry-foot">
+              <div>
+                Currently, we offer two programs: one for ATOMOS and one for CHRONOS. AIDOS’s first product is scheduled for release in Spring 2026.<br>
+                The logos below represent each subsidiary and were created manually. Click on any logo to access its corresponding program.
+              </div>
+              <div class="fractal-panel" aria-label="Interactive fractal geometry">
+                <div class="fractal-label">Fractal Geometry Simulation: Tree Version </div>
+                <div class="fractal-hint">To simulate this program, move the cursor to bend the spirals, then click to seed another branch.</div>
+                <div class="fractal-canvas">
+                  <canvas id="fractalAnim"></canvas>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="section" id="briefs">
+      <h2 class="section-title">Subsidiaries' Illustrations</h2>
+
+      <div class="briefs">
+        <div class="briefs-inner">
+          <div class="brief-grid">
+            <div class="brief">
+              <div class="brief-top">
+                <h3>ATOMOS</h3>
+                <span class="tag">Mathematics</span>
+              </div>
+              <p>
+                ATOMOS is a software subsidiary of DELONEX, focused on developing products closely related to mathematics.
+                These include mathematical tools such as calculators, simulators, rulers, notepads, and discussion forums.
+                We also plan to create mathematical games and puzzles as part of our ongoing work.
+              </p>
+              <p style="margin-top:10px;">
+                The president and administrative leadership of this subsidiary have not yet been appointed.
+              </p>
+              <div class="brief-contact">
+                <strong>Contact</strong>
+                <div class="brief-contact-section">
+                  <strong>President:</strong> TBD<br>
+                  <strong>Email:</strong> TBD
+                </div>
+                <div class="brief-contact-section">
+                  <strong>Administrative Staff:</strong> TBD<br>
+                  <strong>Email:</strong> TBD
+                </div>
+              </div>
+              <div class="brief-badges">
+                <span class="bb">Functions</span><span class="bb">Algebra</span><span class="bb">Geometry</span><span class="bb">Calculus</span><span class="bb">Statistics</span><span class="bb">Numbers</span>
+              </div>
+            </div>
+
+            <div class="brief">
+              <div class="brief-top">
+                <h3>CHRONOS</h3>
+                <span class="tag">Physics</span>
+              </div>
+              <p>
+                CHRONOS is a software subsidiary of DELONEX, focused on developing products closely related to physics.
+                These include tools such as calculators, simulators, virtual labs, notepads, and discussion forums.
+                We also plan to create physics games and puzzles as part of our ongoing work.
+              </p>
+              <p style="margin-top:10px;">
+                The president and administrative leadership of this subsidiary have not yet been appointed.
+              </p>
+              <div class="brief-contact">
+                <strong>Contact</strong>
+                <div class="brief-contact-section">
+                  <strong>President:</strong> TBD<br>
+                  <strong>Email:</strong> TBD
+                </div>
+                <div class="brief-contact-section">
+                  <strong>Administrative Staff:</strong> TBD<br>
+                  <strong>Email:</strong> TBD
+                </div>
+              </div>
+              <div class="brief-badges">
+                <span class="bb">Trajectories</span><span class="bb">Newton's Law</span><span class="bb">Kinematics</span><span class="bb">Orbits</span><span class="bb">Fluids</span><span class="bb">Forces</span>
+              </div>
+            </div>
+
+            <div class="brief">
+              <div class="brief-top">
+                <h3>AIDOS</h3>
+                <span class="tag">AI</span>
+              </div>
+              <p>
+                AIDOS is a software subsidiary of DELONEX, focused on developing products related to artificial intelligence and machine learning.
+                These include online and remote tools such as chatbots, applications, AI companions, homework assistants, and AI generators.
+              </p>
+              <p style="margin-top:10px;">
+                The president and administrative leadership of this subsidiary have not yet been appointed.
+              </p>
+              <div class="brief-contact">
+                <strong>Contact</strong>
+                <div class="brief-contact-section">
+                  <strong>President:</strong> TBD<br>
+                  <strong>Email:</strong> TBD
+                </div>
+                <div class="brief-contact-section">
+                  <strong>Administrative Staff:</strong> TBD<br>
+                  <strong>Email:</strong> TBD
+                </div>
+              </div>
+              <div class="brief-badges">
+                <span class="bb">Machine Learning</span><span class="bb">NLP</span><span class="bb">Chat Bot</span><span class="bb">Robot Training</span><span class="bb">AI Applications</span>
+              </div>
+            </div>
+
+            <div class="brief">
+              <div class="brief-top">
+                <h3>ILIOS</h3>
+                <span class="tag">TBD</span>
+              </div>
+              <p>
+              </p>
+              <div class="brief-badges">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="section" id="programs">
+      <h2 class="section-title">Most Recent Programs</h2>
+
+      <div class="stack">
+        
+        <article class="module" style="--ga: rgba(84,225,179,.18); --gb: rgba(155,246,255,.12); --gc: rgba(179,136,255,.08);" id="atomos-sec">
+          <div class="module-inner">
+            <a class="logo" href="atomos-graphing-calculator.html" aria-label="Open ATOMOS Graphing Calculator">
+              <div class="atomos-mark" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+                  <g stroke="#0a1326" stroke-width="4" stroke-linecap="round">
+                    <ellipse cx="32" cy="32" rx="18" ry="8" transform="rotate(-15 32 32)" stroke-opacity="0.7"/>
+                    <ellipse cx="32" cy="32" rx="18" ry="8" transform="rotate(30 32 32)" stroke-opacity="0.7"/>
+                    <ellipse cx="32" cy="32" rx="18" ry="8" transform="rotate(75 32 32)" stroke-opacity="0.7"/>
+                  </g>
+                  <circle cx="32" cy="32" r="6" fill="#0a1326"/>
+                  <circle cx="44" cy="24" r="3" fill="#0a1326"/>
+                </svg>
+              </div>
+            </a>
+
+            <div class="body">
+              <div class="topline">
+                <h3 class="name">ATOMOS</h3>
+                <span class="badge2">Graphing Calculator</span>
+              </div>
+
+              <p class="desc">
+                ATOMOS Graphing Calculator is a graphing system designed for plotting functions and analyzing mathematical expressions with precision and ease. It features an enhanced Math Laboratory Mode, which provides a comprehensive set of calculus and statistical tools, allowing users to explore derivatives, integrals, limits, data analysis, and probability concepts in an interactive environment.
+              </p>
+
+              <div class="actions">
+                <a class="pill acc" href="atomos-graphing-calculator.html">Open</a>
+                <button class="pill" type="button" data-scroll="#chronos-sec">Next</button>
+              </div>
+
+              <div class="grid3">
+                <div class="stat"><div class="k">Mode</div><div class="v">Graph & Analyze </div></div>
+                <div class="stat"><div class="k">Input</div><div class="v">Num & Variables</div></div>
+                <div class="stat"><div class="k">Output</div><div class="v">Plots & Values</div></div>
+              </div>
+
+              <details class="more">
+                <summary><span>Details</span><span class="badge2">Expand</span></summary>
+                <ul>
+                    <li>Supports graphing of linear, absolute value, quadratic, radical, polynomial, rational, exponential, logarithmic, logistic, natural logarithmic, trigonometric, and inverse trigonometric functions.</li>
+                    <li>Supports finding limits, derivatives, integrals, summations, areas, volumes, and arc lengths, generating series, solving logistic functions and kinematics problems, and applying Euler’s method.</li>
+                    <li>Supports binomial and normal distributions, discrete statistical analysis, and linear regression.</li>
+                </ul>
+              </details>
+            </div>
+          </div>
+        </article>
+
+        
+        <article class="module" style="--ga: rgba(155,246,255,.16); --gb: rgba(84,225,179,.10); --gc: rgba(255,209,102,.08);" id="chronos-sec">
+          <div class="module-inner">
+            <a class="logo" href="chronos-orbit-simulator.html" aria-label="Open CHRONOS Orbit Simulator">
+              <div class="chronos-orb" aria-hidden="true">
+                <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".72">
+                    <circle cx="32" cy="32" r="14"/>
+                    <path d="M13.5 30.5c6-12.5 27-17.5 37-6.8"/>
+                    <path d="M17 36.8c6.2 11 23.4 14.6 32.6 5.8"/>
+                    <path d="M30 17.5c0 2.5 2.2 4.5 5 4.5"/>
+                    <path d="M23 32h-4"/>
+                    <path d="M45 32h-3.5"/>
+                  </g>
+                  <g fill="currentColor" fill-opacity=".95">
+                    <circle cx="32" cy="32" r="6"/>
+                    <circle cx="46" cy="24" r="3"/>
+                  </g>
+                </svg>
+              </div>
+            </a>
+
+            <div class="body">
+              <div class="topline">
+                <h3 class="name">CHRONOS</h3>
+                <span class="badge2">Orbit Simulator</span>
+              </div>
+
+              <p class="desc">
+                CHRONOS Orbit Simulator is an interactive physics simulation built around precise parameter control where allow users to run, inspect, adjust, and compare orbital systems in real time. Designed as a repeatable experimental environment, it enables users to explore orbital mechanics through hands-on investigation and controlled experimentation in mobile.
+              </p>
+
+              <div class="actions">
+                <a class="pill acc" href="chronos-orbit-simulator.html">Open</a>
+                <button class="pill" type="button" data-scroll="#aidos-sec">Next</button>
+              </div>
+
+              <div class="grid3">
+                <div class="stat"><div class="k">Mode</div><div class="v">Simulation & Inspect</div></div>
+                <div class="stat"><div class="k">Input</div><div class="v">Parameter Tuning</div></div>
+                <div class="stat"><div class="k">Output</div><div class="v">Trajectories</div></div>
+              </div>
+
+              <details class="more">
+                <summary><span>Details</span><span class="badge2">Expand</span></summary>
+                <ul>
+                  <li>Supports repeated simulation runs and systematic comparison of parameter variations.</li>
+                  <li>Supports four different modes to simulate an orbit/planet. </li>
+                  <li>Supports seamless transitions and calculation from mathematical modeling to simulation through integration with measuring tools.</li>                  
+                </ul>
+              </details>
+            </div>
+          </div>
+        </article>
+
+        
+        <article class="module" style="--ga: rgba(179,136,255,.14); --gb: rgba(155,246,255,.10); --gc: rgba(84,225,179,.08);" id="aidos-sec">
+          <div class="module-inner">
+            
+            <a class="logo" href="aidos/index.html" aria-label="Open AIDOS">
+              <img class="logo-img" src="assets/aidos-logo.png" alt="AIDOS logo">
+              <div class="fallback" data-fallback="AI">AI</div>
+            </a>
+
+            <div class="body">
+              <div class="topline">
+                <h3 class="name">AIDOS</h3>
+                <span class="badge2">TBD</span>
+              </div>
+
+              <p class="desc">
+              </p>
+
+              <div class="actions">
+                <a class="pill acc" href="aidos/index.html">Open</a>
+                <button class="pill" type="button" data-scroll="#ilios-sec">Next</button>
+              </div>
+
+              <div class="grid3">
+                <div class="stat"><div class="k">Mode</div><div class="v">TBD</div></div>
+                <div class="stat"><div class="k">Input</div><div class="v">TBD</div></div>
+                <div class="stat"><div class="k">Output</div><div class="v">TBD</div></div>
+              </div>
+
+              <details class="more">
+                <summary><span>Details</span><span class="badge2">Expand</span></summary>
+                <ul>
+                </ul>
+              </details>
+            </div>
+          </div>
+        </article>
+
+        
+        <article class="module" style="--ga: rgba(255,209,102,.10); --gb: rgba(155,246,255,.10); --gc: rgba(179,136,255,.08);" id="ilios-sec">
+          <div class="module-inner">
+            <a class="logo" href="ilios/index.html" aria-label="Open ILIOS">
+              <img class="logo-img" src="assets/ilios-logo.png" alt="ILIOS logo">
+              <div class="fallback" data-fallback="IL">IL</div>
+            </a>
+
+            <div class="body">
+              <div class="topline">
+                <h3 class="name">ILIOS</h3>
+                <span class="badge2">TBD</span>
+              </div>
+
+              <p class="desc">
+              </p>
+
+              <div class="actions">
+                <a class="pill acc" href="ilios/index.html">Open</a>
+                <button class="pill" type="button" data-scroll="#work">Next</button>
+              </div>
+
+              <div class="grid3">
+                <div class="stat"><div class="k">Mode</div><div class="v">TBD</div></div>
+                <div class="stat"><div class="k">Input</div><div class="v">TBD</div></div>
+                <div class="stat"><div class="k">Output</div><div class="v">TBD</div></div>
+              </div>
+
+              <details class="more">
+                <summary><span>Details</span><span class="badge2">Expand</span></summary>
+                <ul>
+                </ul>
+              </details>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    
+    <section class="section" id="work">
+      <h2 class="section-title">Want To Work With Us?</h2>
+
+      <div class="work">
+        <div class="work-inner">
+          <div style="color:var(--mut); font-weight:800; letter-spacing:.14px; line-height:1.7;">
+            DELONEX offers various opportunities for collaboration, including open positions, academic partnerships, and direct contact channels. We are committed to forming a collaborative environment where innovation thrives. Explore the options below to find out how you can get involved with our institution.
+          </div>
+
+          <div class="work-grid">
+            <div class="work-card">
+              <h3>Positions</h3>
+              <p>We currently have 27 open roles available for high school students with strong experience in JavaScript, mathematics, physics, and artificial intelligence. We encourage motivated students to apply.</p>
+              <div class="work-actions">
+                <a class="pill acc" href="positions.html">View positions</a>
+              </div>
+            </div>
+            <div class="work-card">
+              <h3>Partnerships</h3>
+              <p>DELONEX welcomes collaboration, sponsorship, and partnership opportunities with industries and corporations. If you are interested, please visit the Partnership page.</p>
+              <div class="work-actions">
+                <a class="pill acc" href="partnerships.html">Explore partnerships</a>
+              </div>
+            </div>
+            <div class="work-card">
+              <h3>Contact</h3>
+              <p>If you would like to be involved with us in any other capacity please complete the form on the Contact page. Different positions, roles, and collaboration types require different forms. </p>
+              <div class="work-actions">
+                <a class="pill acc" href="contact.html">Contact</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="feedback">
+      <h2 class="section-title">Feedback Form</h2>
+
+      <div class="feedback">
+        <form class="feedback-inner" aria-label="Subsidiary feedback form" action="https://formspree.io/f/mnjqpyyo" method="post">
+          <div class="feedback-grid">
+            <div class="feedback-field">
+              <label for="feedbackName">Your Name</label>
+              <input id="feedbackName" name="name" type="text" placeholder="Name">
+            </div>
+            <div class="feedback-field">
+              <label for="feedbackEmail">Email</label>
+              <input id="feedbackEmail" name="email" type="email" placeholder="name@gmail.com">
+            </div>
+            <div class="feedback-field">
+              <label for="feedbackSubsidiary">Subsidiary</label>
+              <select id="feedbackSubsidiary" name="subsidiary">
+                <option value="ATOMOS">ATOMOS</option>
+                <option value="CHRONOS">CHRONOS</option>
+                <option value="AIDOS">AIDOS</option>
+                <option value="ILIOS">ILIOS</option>
+              </select>
+            </div>
+            <div class="feedback-field">
+              <label for="feedbackTopic">Topic</label>
+              <input id="feedbackTopic" name="topic" type="text" placeholder="Feature request, Bug, Question">
+            </div>
+            <div class="feedback-field full">
+              <label for="feedbackMessage">Feedback</label>
+              <textarea id="feedbackMessage" name="message" placeholder="Share your feedback..."></textarea>
+            </div>
+          </div>
+          <div class="feedback-actions">
+            <button class="pill acc" type="submit">Submit Feedback</button>
+            <span class="hint">We read every message.</span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    
+    <section class="site-footer" aria-label="Footer navigation">
+      <div class="footer-shell">
+        <div class="footer-inner">
+          <div class="footer-brand">
+            <div class="mini-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="8" fill="#0a1224"/>
+                <path d="M5 12c3 0 4.2-5 7-5s4 5 7 5" stroke="#54e1b3" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M5 12c3 0 4.2 5 7 5s4-5 7-5" stroke="#38bdf8" stroke-width="1.2" stroke-linecap="round" opacity="0.9"/>
+                <circle cx="12" cy="12" r="2.2" fill="#f8fafc"/>
+              </svg>
+            </div>
+            <div>
+              <h3>DELONEX</h3>
+              <p>
+                Artificial Intelligence, Computer Science, Mathematics, and Physics Based Insitution
+              </p>
+            </div>
+          </div>
+
+          <div class="footer-col">
+            <h4>Subsidiaries</h4>
+            <div class="footer-links">
+              <a href="#" id="footerAtomos">ATOMOS</a>
+              <a class="footer-subnote" id="footerAtomosNote" href="atomos-graphing-calculator.html" hidden>Graphing Calculator</a>
+              <a href="#" id="footerChronos">CHRONOS</a>
+              <a class="footer-subnote" id="footerChronosNote" href="chronos-orbit-simulator.html" hidden>Orbit Simulator</a>
+              
+              <button type="button">AIDOS</button>
+              <button type="button">ILIOS</button>
+            </div>
+          </div>
+
+          <div class="footer-col">
+            <h4>Company Informations</h4>
+            <div class="footer-links">
+              <a href="members.html">Members</a>
+              <a href="positoons.html">Positions</a>
+              <a href="partnerships.html">Partnerships</a>
+              <a href="contact.html">Contact</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <div>© 2025 DELONEX &amp; Koo Kim (DELTA STEINER) | All rights reserved.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+
+    const THEME_KEY = "delonex_theme";
+    const htmlEl = document.documentElement;
+    const themeColorMeta = document.getElementById("themeColorMeta");
+
+    const themeToggle = document.getElementById("themeToggle");
+    const themeToggleMobile = document.getElementById("themeToggleMobile");
+    const themeButtons = [themeToggle, themeToggleMobile].filter(Boolean);
+
+    function updateThemeButton(btn, theme){
+      if(!btn) return;
+      const isLight = theme === "light";
+      const icon = btn.querySelector(".theme-icon");
+      if(icon) icon.textContent = isLight ? "☀" : "🌙";
+      btn.setAttribute("aria-pressed", String(isLight));
+      btn.classList.toggle("is-light", isLight);
+    }
+
+    function applyTheme(theme){
+      htmlEl.dataset.theme = theme;
+      localStorage.setItem(THEME_KEY, theme);
+      themeButtons.forEach(b => updateThemeButton(b, theme));
+      if(themeColorMeta){
+        themeColorMeta.setAttribute("content", theme === "light" ? "#f4f6ff" : "#0b1020");
+      }
+      if (window.__delonexAnim && typeof window.__delonexAnim.setTheme === "function") {
+        window.__delonexAnim.setTheme(theme);
+      }
+    }
+
+    function initTheme(){
+      const saved = localStorage.getItem(THEME_KEY);
+      if(saved === "light" || saved === "dark"){
+        applyTheme(saved);
+        return;
+      }
+      const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+      applyTheme(prefersLight ? "light" : "dark");
+    }
+
+    function toggleTheme(){
+      const next = htmlEl.dataset.theme === "light" ? "dark" : "light";
+      applyTheme(next);
+    }
+
+    themeButtons.forEach(btn => btn.addEventListener("click", toggleTheme));
+    initTheme();
+
+    const hamburger = document.getElementById("hamburger");
+    const drawer = document.getElementById("drawer");
+
+    function setDrawer(open){
+      drawer.dataset.open = open ? "true" : "false";
+      hamburger.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+
+    if(hamburger && drawer){
+      hamburger.addEventListener("click", () => setDrawer(drawer.dataset.open !== "true"));
+      drawer.addEventListener("click", (e) => {
+        const clicked = e.target.closest(".navbtn, a, button");
+        if(clicked && !clicked.classList.contains("theme-toggle")){
+          setDrawer(false);
+        }
+      });
+    }
+
+    const subnav = document.getElementById("subnav");
+    const subnavWrap = document.getElementById("subnavWrap");
+
+    const navAtomos = document.getElementById("navAtomos");
+    const navChronos = document.getElementById("navChronos");
+    const mAtomos = document.getElementById("mAtomos");
+    const mChronos = document.getElementById("mChronos");
+
+    function closeSubnav(){
+      if(!subnav) return;
+      subnav.dataset.open = "false";
+      subnavWrap.innerHTML = "";
+      if(navAtomos) navAtomos.setAttribute("aria-expanded", "false");
+      if(navChronos) navChronos.setAttribute("aria-expanded", "false");
+    }
+
+    function openAtomos(){
+      subnavWrap.innerHTML = `
+        <div class="subhint">ATOMOS PRODUCTS</div>
+        <div class="subcenter">
+          <a class="subpill" href="atomos-graphing-calculator.html">Graphing Calculator</a>
+        </div>
+        <div class="subspacer">spacer</div>
+      `;
+      subnav.dataset.open = "true";
+      if(navAtomos) navAtomos.setAttribute("aria-expanded", "true");
+      if(navChronos) navChronos.setAttribute("aria-expanded", "false");
+    }
+
+    function openChronos(){
+      subnavWrap.innerHTML = `
+        <div class="subhint">CHRONOS PRODUCTS</div>
+        <div class="subcenter">
+          <a class="subpill" href="chronos-orbit-simulator.html">Orbit Simulator</a>
+        </div>
+        <div class="subspacer">spacer</div>
+      `;
+      subnav.dataset.open = "true";
+      if(navChronos) navChronos.setAttribute("aria-expanded", "true");
+      if(navAtomos) navAtomos.setAttribute("aria-expanded", "false");
+    }
+
+    if(subnavWrap){
+      subnavWrap.addEventListener("click", (e) => {
+        const link = e.target.closest("a");
+        if(link) closeSubnav();
+      });
+    }
+
+    function toggleAtomos(){
+      const isOpen = subnav.dataset.open === "true" && navAtomos && navAtomos.getAttribute("aria-expanded") === "true";
+      if(isOpen) closeSubnav(); else openAtomos();
+    }
+    function toggleChronos(){
+      const isOpen = subnav.dataset.open === "true" && navChronos && navChronos.getAttribute("aria-expanded") === "true";
+      if(isOpen) closeSubnav(); else openChronos();
+    }
+
+    if(navAtomos) navAtomos.addEventListener("click", toggleAtomos);
+    if(navChronos) navChronos.addEventListener("click", toggleChronos);
+
+    if(mAtomos) mAtomos.addEventListener("click", () => { setDrawer(false); toggleAtomos(); });
+    if(mChronos) mChronos.addEventListener("click", () => { setDrawer(false); toggleChronos(); });
+
+    document.addEventListener("click", (e) => {
+      const inHeader = e.target.closest("header");
+      if(!inHeader && subnav && subnav.dataset.open === "true") closeSubnav();
+    });
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape" && subnav && subnav.dataset.open === "true") closeSubnav();
+    });
+
+    const footerAtomos = document.getElementById("footerAtomos");
+    const footerChronos = document.getElementById("footerChronos");
+    const footerAtomosNote = document.getElementById("footerAtomosNote");
+    const footerChronosNote = document.getElementById("footerChronosNote");
+
+    function toggleFooterNote(note){
+      if(!note) return;
+      const isHidden = note.hasAttribute("hidden");
+      if(isHidden) note.removeAttribute("hidden");
+      else note.setAttribute("hidden", "");
+    }
+
+    if(footerAtomos){
+      footerAtomos.addEventListener("click", (e) => {
+        e.preventDefault();
+        toggleFooterNote(footerAtomosNote);
+      });
+    }
+    if(footerChronos){
+      footerChronos.addEventListener("click", (e) => {
+        e.preventDefault();
+        toggleFooterNote(footerChronosNote);
+      });
+    }
+
+    function initAltReveal(){
+      const sequence = [
+        document.querySelector("header"),
+        document.querySelector(".hero"),
+        ...document.querySelectorAll(".section"),
+        ...document.querySelectorAll(".module"),
+        document.querySelector(".site-footer")
+      ].filter(Boolean);
+      sequence.forEach((el, i) => {
+        el.classList.add("reveal-alt");
+        if(i % 2 === 1) el.classList.add("r");
+        el.style.setProperty("--delay", `${i * 0.08}s`);
+      });
+      requestAnimationFrame(() => document.body.classList.add("reveal-on-alt"));
+    }
+    initAltReveal();
+
+    function syncLogo(img){
+      const wrap = img.closest(".logo");
+      if(!wrap) return;
+      const fb = wrap.querySelector(".fallback");
+      if(!fb) return;
+
+      const ok = img.complete && img.naturalWidth > 0;
+      img.style.display = ok ? "block" : "none";
+      fb.style.display = ok ? "none" : "grid";
+    }
+    const imgs = Array.from(document.querySelectorAll(".logo-img"));
+    imgs.forEach(img => {
+      img.addEventListener("load", () => syncLogo(img));
+      img.addEventListener("error", () => syncLogo(img));
+      syncLogo(img);
+    });
+
+    document.addEventListener("click", (e) => {
+      const s = e.target.closest("[data-scroll]");
+      if(s){
+        const sel = s.getAttribute("data-scroll");
+        const target = document.querySelector(sel);
+        if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+      }
+    });
+
+    const modules = Array.from(document.querySelectorAll(".module"));
+    modules.forEach(mod => {
+      let raf = 0;
+      function onMove(ev){
+        const r = mod.getBoundingClientRect();
+        const x = (ev.clientX - r.left) / r.width;
+        const y = (ev.clientY - r.top) / r.height;
+        const rx = (0.5 - y) * 2.0;
+        const ry = (x - 0.5) * 2.0;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          mod.style.transform = `perspective(900px) rotateX(${rx*1.2}deg) rotateY(${ry*1.4}deg) translateY(-1px)`;
+        });
+      }
+      function reset(){
+        cancelAnimationFrame(raf);
+        mod.style.transform = "";
+      }
+      mod.addEventListener("mousemove", onMove);
+      mod.addEventListener("mouseleave", reset);
+      mod.addEventListener("blur", reset);
+    });
+
+    (function(){
+      const canvas = document.getElementById("fractalAnim");
+      if(!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      const state = {
+        dpr: 1,
+        w: 0,
+        h: 0,
+        t: 0,
+        pointer: { x: 0, y: 0, active: false },
+        angleSeed: Math.PI / 4,
+        depthSeed: 12
+      };
+
+      function resize(){
+        const rect = canvas.getBoundingClientRect();
+        state.dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        state.w = Math.max(260, Math.floor(rect.width * state.dpr));
+        state.h = Math.max(220, Math.floor(rect.height * state.dpr));
+        canvas.width = state.w;
+        canvas.height = state.h;
+      }
+
+      function drawLine(x1, y1, x2, y2, width, color){
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+
+      function drawBranch(x, y, length, angle, depth){
+        if(depth <= 0 || length < 2) return;
+        const dx = Math.cos(angle) * length;
+        const dy = Math.sin(angle) * length;
+        const nx = x + dx;
+        const ny = y + dy;
+        const hue = 210 + Math.sin(state.t * 0.02 + depth) * 6 + depth * 4;
+        drawLine(x, y, nx, ny, Math.max(1, depth * 0.5), `hsla(${hue},80%,65%,0.85)`);
+        const sway = Math.sin(state.t * 0.02 + depth) * 0.18;
+        const pointerInfluence = (state.pointer.x / state.w - 0.5) * 0.5;
+        const baseAngle = state.angleSeed + pointerInfluence;
+        const scale = 0.65 + (state.pointer.y / state.h) * 0.25;
+        drawBranch(nx, ny, length * scale, angle + baseAngle + sway, depth - 1);
+        drawBranch(nx, ny, length * scale, angle - baseAngle + sway, depth - 1);
+      }
+
+      function drawBackground(){
+        const grd = ctx.createLinearGradient(0, 0, state.w, state.h);
+        grd.addColorStop(0, "rgba(84,225,179,0.05)");
+        grd.addColorStop(1, "rgba(6,12,32,0.25)");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, state.w, state.h);
+      }
+
+      function draw(){
+        state.t += 1;
+        drawBackground();
+        const depth = state.depthSeed + Math.floor(Math.sin(state.t * 0.04) * 2);
+        drawBranch(state.w * 0.5, state.h - 25 * state.dpr, state.h * 0.28, -Math.PI / 2, depth);
+        if(!reduceMotion) requestAnimationFrame(draw);
+      }
+
+      function toLocal(ev){
+        const rect = canvas.getBoundingClientRect();
+        state.pointer.x = (ev.clientX - rect.left) * state.dpr;
+        state.pointer.y = (ev.clientY - rect.top) * state.dpr;
+      }
+
+      canvas.addEventListener("pointermove", (ev) => {
+        state.pointer.active = true;
+        toLocal(ev);
+        state.angleSeed = Math.PI / 4 + (state.pointer.x / state.w - 0.5) * 0.4;
+        state.depthSeed = 10 + Math.round((state.pointer.y / state.h) * 6);
+      });
+      canvas.addEventListener("pointerleave", () => {
+        state.pointer.active = false;
+        state.angleSeed = Math.PI / 4;
+        state.depthSeed = 12;
+      });
+      canvas.addEventListener("pointerdown", (ev) => {
+        toLocal(ev);
+        state.depthSeed = 12 + Math.round((state.pointer.y / state.h) * 6);
+      });
+
+      window.addEventListener("resize", () => {
+        resize();
+        draw();
+      });
+
+      resize();
+      draw();
+    })();
+
+  </script>
+</body>
+</html>
